@@ -42,7 +42,6 @@ export const isMoveValid = (position, moveStart, moveEnd) =>{
       return false;
    }
    if(start.pieceColor == end.pieceColor){   //cannot capture your own pieces.   FIX_FOR_CASTLE
-      alert('help');
       return false;
    }
 
@@ -108,21 +107,44 @@ export const isMoveValid = (position, moveStart, moveEnd) =>{
       }
 
       case 'b':{
-         if(xMovement!=yMovement){
+         if(xMovement!=yMovement || !checkPath(position, start.x,start.y, end.x, end.y)){
             return false;
-         }else{
-            let stepX = Math.sign(end.x-start.x);
-            let stepY = Math.sign(end.y-start.y);
-            for(let i= 0; i<xMovement-1;i++){ // we do xMovement-1 becouse the target square is already checked at the top, it could also be yMovement-1
-               let squareInPath = start.y+i*stepY*8 + (start.x+i*stepX);
-            }
          }
+         break;
+      }
+      case 'r':{
+         if(xMovement!= 0 && yMovement != 0 || !checkPath(position, start.x,start.y, end.x, end.y)){
+            return false;
+         }
+         break;
       }
 
+      case 'q':{
+         if( ((xMovement!= 0 && yMovement != 0)&&(xMovement!=yMovement))
+            || !checkPath(position, start.x,start.y, end.x, end.y) ){
+            return false;
+         }
+         break;
+      }
+      case 'k';{
+         
+      }
+   }
+
+   
+   return true;
+}
+const checkPath = (position, startX, startY, endX, endY)=>{    //returns true if the path if clear for the piece.
+   let stepX = Math.sign(endX-startX);
+   let stepY = Math.sign(endY-startY);
+   for(let i= 1; i<Math.max(Math.abs(endX-startX), Math.abs(endY-startY));i++){     
+      let squareInPath = (startY+i*stepY)*8 + (startX+i*stepX);
+      if(position.board[squareInPath] != ''){
+         return false;
+      }
    }
    return true;
 }
-
 export const doMove = (position, moveStart, moveEnd) =>{
    position.board[moveEnd] = position.board[moveStart];
    position.board[moveStart] = '';
