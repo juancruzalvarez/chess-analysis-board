@@ -46,15 +46,15 @@ export const startPosition = {
 
 
 export const isMoveValid = (position, moveStart, moveEnd) =>{
-   let start = {                                                        //starting square of the move
+   let start = {                                                       
       square: coord1Dto2D(moveStart),
-      piece: position.board[moveStart],                                 //piece to move
+      piece: position.board[moveStart],                                
       pieceColor: getPieceColor(position.board[moveStart])
    };
 
-   let end = {                                                        //starting square of the move
+   let end = {                                                        
       square: coord1Dto2D(moveEnd),
-      piece: position.board[moveEnd],                                 //piece to move
+      piece: position.board[moveEnd],                                
       pieceColor: getPieceColor(position.board[moveEnd])
    };
 
@@ -260,21 +260,21 @@ const isAttackedBy = (board, square, color)=>{ //return true if color is attacki
 
    //horizontal direction
    let pieceHit;
-   pieceHit = checkPath(board, x,y,7,y);
+   pieceHit = checkPath(board, x,y,8,y);
    if(pieceHit === queen || pieceHit === rook || pieceHit === king){
       return true;
    }
-   pieceHit = checkPath(board, x,y,0,y);
+   pieceHit = checkPath(board, x,y,0,y);//should be -1????????
    if(pieceHit === queen || pieceHit === rook || pieceHit === king){
       return true;
    }
 
    //vertical direction
-   pieceHit = checkPath(board, x,y,x,7);
+   pieceHit = checkPath(board, x,y,x,8);
    if(pieceHit === queen || pieceHit === rook || pieceHit === king){
       return true;
    }
-   pieceHit = checkPath(board, x,y,x,0);
+   pieceHit = checkPath(board, x,y,x,0);//should be -1????????
    if(pieceHit === queen || pieceHit === rook || pieceHit === king){
       return true;
    }
@@ -297,7 +297,7 @@ const isAttackedBy = (board, square, color)=>{ //return true if color is attacki
       return true;
    }
 
-   //pawn check
+   //pawn attacks
    let pawnAttackSquares = color === colors.WHITE ? [coord2Dto1D(x-1,y+1), coord2Dto1D(x+1,y+1)] : [coord2Dto1D(x-1,y-1), coord2Dto1D(x+1,y-1)];
    for(const s of pawnAttackSquares){
       if(s!==null && board[s] === pawn){
@@ -305,7 +305,7 @@ const isAttackedBy = (board, square, color)=>{ //return true if color is attacki
       }
    }
 
-   //knight check
+   //knight attacks
    let knightAttackSquares = [coord2Dto1D(x+2,y+1), coord2Dto1D(x+2,y-1),coord2Dto1D(x-2,y+1),coord2Dto1D(x-2,y-1),
     coord2Dto1D(x+1,y+2),coord2Dto1D(x-1,y+2),coord2Dto1D(x+1,y-2),coord2Dto1D(x-1,y-2)];
    for(const s of knightAttackSquares){
@@ -316,7 +316,7 @@ const isAttackedBy = (board, square, color)=>{ //return true if color is attacki
    return false;
 };
 
-const isOnCheck = (board, color)=>{    //missing handling pawn checks
+const isOnCheck = (board, color)=>{    
    let king = getPieceOfColor(pieces.KING, color);
    let kingSquare = board.findIndex((element)=>element === king);
    return isAttackedBy(board, kingSquare, getOpositeColor(color));
@@ -330,7 +330,7 @@ const coord2Dto1D = (x, y)=>{
 };
 
 const coord1Dto2D = (index)=>{
-   if(index > -1 && index<64){
+   if(index >= 0 && index < 64){
       let pos = {
          x: index%8,
          y: Math.floor(index/8)
@@ -348,7 +348,7 @@ const getPieceColor = (piece)=>{
    if(piece){
       return piece === piece.toLowerCase() ? colors.BLACK: colors.WHITE;
    }else{
-      return pieces.NO_PIECE;
+      return colors.NO_COLOR;
    }
 };
 
@@ -356,7 +356,7 @@ const getPieceOfColor = (piece, color) =>{   //return a piece of the color given
    return color === colors.WHITE ? piece.toUpperCase() : piece.toLowerCase();
 };
 
-const getOpositeColor = (color) =>{       //given a color return the other one b->w, w->b
+const getOpositeColor = (color) =>{
    if(color){
       return (color === colors.WHITE ? colors.BLACK : colors.WHITE);
    }
