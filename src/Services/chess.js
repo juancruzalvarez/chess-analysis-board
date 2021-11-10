@@ -32,18 +32,16 @@ export const startPosition = {
        '','','','','','','','',
       'P','P','P','P','P','P','P','P', 
       'R','N','B','Q','K','B','N','R'],
-   move: 'w',                             //whose move it is in the position (w->white, b->black)
+   move: colors.WHITE,                             //whose move it is in the position (w->white, b->black)
    castlingPrivileges:{                   //determinates how can white and black castle, based on if the king or rooks have moved.
-      whiteShort:true,            
-      whiteLong:true,    
+      whiteShort: true,
+      whiteLong:true,   
       blackShort:true,           
       blackLong:true
    },
    enpassantSquare: null,                  //holds the square witch can be captured enpassant, for most of the game null
    fiftyMoveRuleCount:0                    //holds the number of moves without captures or pawn pushes    
 };
-
-
 
 export const isMoveValid = (position, moveStart, moveEnd) =>{
    let start = {                                                       
@@ -64,7 +62,9 @@ export const isMoveValid = (position, moveStart, moveEnd) =>{
    if(start.pieceColor !== position.move){    //cannot move oponent's pieces.
       return false;
    }
-   if(start.pieceColor === end.pieceColor){   //cannot capture your own pieces.   FIX_FOR_CASTLE
+
+   if(start.pieceColor === end.pieceColor){   //cannot capture your own pieces. fix so u can castle pressing on the rook
+
       return false;
    }
 
@@ -153,9 +153,31 @@ export const isMoveValid = (position, moveStart, moveEnd) =>{
       }
 
       case pieces.KING:{
-         if(xMovement>1||yMovement>1){
+         if(yMovement>1){
             return false;
+         }else if(xMovement>1){
+            if(yMovement != 0){
+               return false;
+            }else{
+               //castle
+               if(start.x > end.x){
+                  if(start.pieceColor === colors.WHITE && !position.castlingPrivileges.whiteLong){
+                     return false;
+                  }
+                  if(start.pieceColor === colors.BLACK && !position.castlingPrivileges.blackLong){
+                     return false;
+                  }
+               }else{
+                  if(start.pieceColor === colors.WHITE && !position.castlingPrivileges.whiteShort){
+                     return false;
+                  }
+                  if(start.pieceColor === colors.BLACK && !position.castlingPrivileges.blackShort){
+                     return false;
+                  }
+               }
+            }
          }
+
          break;
       }
 
@@ -195,7 +217,9 @@ export const doMove = (board, moveStart, moveEnd) =>{    //ionly changes board p
       }else{
          board[coord2Dto1D(end.square.x,end.square.y-1)] = '';
       }
-   }else{                                                                              //handle castle and promotion
+   }else if(getPieceType(start.piece)===pieces.KING && Math.abs(start.x-end.x) >1){                                                                              //handle castle and promotion
+      
+   }else{
       board[moveEnd] = board[moveStart];  
       board[moveStart] = '';
    }
