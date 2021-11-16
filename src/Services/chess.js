@@ -1,4 +1,21 @@
-const pieces = {
+const squares = {
+   a8: 0,
+   b8: 1,
+   c8: 2,
+   d8: 3,
+   f8: 5,
+   g8: 6,
+   h8: 7,
+   a1: 56,
+   b1: 57,
+   c1: 58,
+   d1: 59,
+   f1: 61,
+   g1: 62, 
+   h1: 63 
+}
+
+export const pieces = {
    NO_PIECE: '',
    PAWN:     'p',
    KNIGTH:   'n',
@@ -8,7 +25,7 @@ const pieces = {
    KING:     'k'
 };
 
-const colors ={
+export const colors ={
    NO_COLOR: '',
    WHITE:    'w',
    BLACK:    'b'
@@ -24,15 +41,15 @@ export const moveType ={
 
 export const startPosition = {
    board: 
-      ['r','n','b','q','k','b','n','r',   //board array containing what pieces are in witch square
-      'p','p','p','p','p','p','p','p',    // lowercase letters are black pieces and uppercase letters are white pieces
+      ['r','n','b','q','k','b','n','r',   //array holding pieces positions
+      'p','p','p','p','p','p','p','p',    // lowercase -> black  UPPERCASE -> white
        '','','','','','','','',           // p->pawn, n->knight, b->bishop, r->rook, q->queen, k->king
        '','','','','','','','',           //ej p->black pawn, K->white king
        '','','','','','','','',
        '','','','','','','','',
       'P','P','P','P','P','P','P','P', 
       'R','N','B','Q','K','B','N','R'],
-   move: colors.WHITE,                             //whose move it is in the position (w->white, b->black)
+   move: colors.WHITE,                             //whose move it is in the position
    castlingPrivileges:{                   //determinates how can white and black castle, based on if the king or rooks have moved.
       whiteShort: true,
       whiteLong:true,   
@@ -156,22 +173,40 @@ export const isMoveValid = (position, moveStart, moveEnd) =>{
          if(yMovement>1){
             return false;
          }else if(xMovement>1){
-            if(yMovement != 0){
+            if(yMovement !== 0){
                return false;
             }else{
                //castle
-               if(start.x > end.x){
-                  if(start.pieceColor === colors.WHITE && !position.castlingPrivileges.whiteLong){
+               if(start.square.x > end.square.x){
+                  if(start.pieceColor === colors.WHITE && 
+                     (!position.castlingPrivileges.whiteLong ||
+                     position.board[squares.d1] !== pieces.NO_PIECE ||
+                     position.board[squares.c1] !== pieces.NO_PIECE ||
+                     position.board[squares.b1] !== pieces.NO_PIECE ||
+                     isAttackedBy(position.board,squares.d1,getOpositeColor(start.pieceColor)))){
                      return false;
                   }
-                  if(start.pieceColor === colors.BLACK && !position.castlingPrivileges.blackLong){
+                  if(start.pieceColor === colors.BLACK &&
+                     (!position.castlingPrivileges.blackLong ||
+                     position.board[squares.d8]!== pieces.NO_PIECE ||
+                     position.board[squares.c8]!== pieces.NO_PIECE ||
+                     position.board[squares.b8] !== pieces.NO_PIECE ||
+                     isAttackedBy(position.board,squares.d8,getOpositeColor(start.pieceColor)))){
                      return false;
                   }
                }else{
-                  if(start.pieceColor === colors.WHITE && !position.castlingPrivileges.whiteShort){
+                  if(start.pieceColor === colors.WHITE &&
+                     (!position.castlingPrivileges.whiteShort ||
+                     position.board[squares.f1]!== pieces.NO_PIECE ||
+                     position.board[squares.g1]!== pieces.NO_PIECE ||
+                         isAttackedBy(position.board,squares.f1,getOpositeColor(start.pieceColor)))){
                      return false;
                   }
-                  if(start.pieceColor === colors.BLACK && !position.castlingPrivileges.blackShort){
+                  if(start.pieceColor === colors.BLACK &&
+                     (!position.castlingPrivileges.blackShort ||
+                     position.board[squares.f8]!== pieces.NO_PIECE ||
+                     position.board[squares.g8]!== pieces.NO_PIECE ||
+                     isAttackedBy(position.board,squares.f8,getOpositeColor(start.pieceColor)))){
                      return false;
                   }
                }
@@ -211,25 +246,38 @@ export const doMove = (board, moveStart, moveEnd) =>{    //ionly changes board p
 
    if(getPieceType(start.piece) === pieces.PAWN && start.square.x !== end.square.x && end.piece === pieces.NO_PIECE){         //hnalde enpassant
       board[moveEnd] = start.piece;
-      board[moveStart] = '';
+      board[moveStart] = pieces.NO_PIECE;
       if(start.pieceColor === colors.WHITE){
-         board[coord2Dto1D(end.square.x,end.square.y+1)] = '';
+         board[coord2Dto1D(end.square.x,end.square.y+1)] = pieces.NO_PIECE;
       }else{
-         board[coord2Dto1D(end.square.x,end.square.y-1)] = '';
+         board[coord2Dto1D(end.square.x,end.square.y-1)] = pieces.NO_PIECE;
       }
-   }else if(getPieceType(start.piece)===pieces.KING && Math.abs(start.x-end.x) >1){                                                                              //handle castle and promotion
-      
+   }else if(getPieceType(start.piece)===pieces.KING && Math.abs(start.square.x-end.square.x) >1){                                                                              //handle castle and promotion
+      let rank = start.pieceColor === colors.WHITE ? 7 : 0;
+      console.log(rank);
+      if(start.square.x-end.square.x >0){
+         board[moveStart] = pieces.NO_PIECE;
+         board[coord2Dto1D(0,rank)] = pieces.NO_PIECE;
+         board[coord2Dto1D(2,rank)] = getPieceOfColor(pieces.KING, start.pieceColor);
+         board[coord2Dto1D(3,rank)] = getPieceOfColor(pieces.ROOK, start.pieceColor);
+      }else{
+         board[moveStart] = pieces.NO_PIECE;
+         board[coord2Dto1D(7,rank)] = pieces.NO_PIECE;
+         console.log(coord2Dto1D(7,rank));
+         board[coord2Dto1D(6,rank)] = getPieceOfColor(pieces.KING, start.pieceColor);
+         console.log(coord2Dto1D(6,rank));
+         board[coord2Dto1D(5,rank)] = getPieceOfColor(pieces.ROOK, start.pieceColor);
+         console.log(coord2Dto1D(5,rank));
+      } 
    }else{
       board[moveEnd] = board[moveStart];  
-      board[moveStart] = '';
+      board[moveStart] = pieces.NO_PIECE;
    }
    
 };
 
 export const performMove = (position, moveStart, moveEnd) =>{  //updates the entire position (really does the move)
-   
-   
-  
+
    let start = {                                                        //starting square of the move
       square: coord1Dto2D(moveStart),
       piece: position.board[moveStart],                                 //piece to move
@@ -243,17 +291,36 @@ export const performMove = (position, moveStart, moveEnd) =>{  //updates the ent
    };
    let pieceType = getPieceType(start.piece);
 
-   if(pieceType === pieces.PAWN && Math.abs(end.square.y-start.square.y) === 2){ // long pawn move, update enpassant square
-      position.enpassantSquare = start.pieceColor === colors.WHITE ? coord2Dto1D(end.square.x, end.square.y+1) : coord2Dto1D(end.square.x, end.square.y-1);
-   }else{
-      position.enpassantSquare = null;
+   if(pieceType === pieces.PAWN ){      
+      position.fiftyMoveRuleCount = 0; //update fifty move rule count
+      if(Math.abs(end.square.y-start.square.y) === 2){
+         position.enpassantSquare = start.pieceColor === colors.WHITE ? coord2Dto1D(end.square.x, end.square.y+1) : coord2Dto1D(end.square.x, end.square.y-1);
+      }else{
+         position.enpassantSquare = null;
+      }
+   }else if(pieceType === pieces.KING){
+      if(start.pieceColor === colors.WHITE){
+         position.castlingPrivileges.whiteLong = false;
+         position.castlingPrivileges.whiteShort = false;
+      }else{
+         position.castlingPrivileges.blackLong = false;
+         position.castlingPrivileges.blackShort = false;
+      }
+   }else if(pieceType === pieces.ROOK){
+      if(start.pieceColor === colors.WHITE){
+         if(moveStart === squares.a1){
+            position.castlingPrivileges.whiteLong = false;
+         }else if(moveStart === squares.h1){
+            position.castlingPrivileges.whiteShort = false;
+         }
+      }else{
+         if(moveStart === squares.a8){
+            position.castlingPrivileges.blackLong = false;
+         }else if(moveStart === squares.h8){
+            position.castlingPrivileges.blackShort = false;
+         }
+      }
    }
-
-   if(pieceType === pieces.PAWN ){      //update fifty move rule count
-      position.fiftyMoveRuleCount = 0;
-   }
-
-   //handle castle
    position.move = getOpositeColor(position.move);
    doMove(position.board, moveStart, moveEnd);
 }

@@ -13,7 +13,7 @@ import black_king_img_src from '../Assets/pieces/black_king.png'
 import white_king_img_src from '../Assets/pieces/white_king.png'
 import black_horse_img_src from '../Assets/pieces/black_horse.png'
 import white_horse_img_src from '../Assets/pieces/white_horse.png'
-import { startPosition, isMoveValid, performMove } from '../Services/chess.js'
+import { startPosition, pieces, colors, isMoveValid, performMove } from '../Services/chess.js'
 const pieceImages = {
    'p':black_pawn_img_src,
    'P':white_pawn_img_src,
