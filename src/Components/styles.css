@@ -51,8 +51,6 @@ body{
    background-color: white;
    grid-column: 3;
    grid-row: 2;
-   display:grid;
-   grid-template-columns: 1fr 5fr 5fr;
 }
 
 .moveDisplay{
