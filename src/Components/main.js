@@ -8,13 +8,13 @@ import {Node} from  '../Services/moveTree'
 export class Main extends React.Component{
    constructor(props){
       super(props);
-      let e4 = new Node('e4');
-      let e5 = new Node('e5');
-      let nf3 = new Node('nf3');
-      let nc3 = new Node('nc3');
-      let nc6 = new Node('nc6');
-      let nf6 = new Node('nf6');
-      let nxe5 = new Node('nxe5');
+      let e4 = new Node('e4',0);
+      let e5 = new Node('e5',1);
+      let nf3 = new Node('nf3',2);
+      let nc3 = new Node('nc3',2);
+      let nc6 = new Node('nc6',3);
+      let nf6 = new Node('nf6',3);
+      let nxe5 = new Node('nxe5',4);
       
       nc3.addChildren(nc6);
       nf6.addChildren(nxe5);

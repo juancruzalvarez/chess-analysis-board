@@ -1,5 +1,6 @@
-export function Node (value){
-   this.value = value;
+export function Node (move, moveNumber){
+   this.move = move;
+   this.moveNumber = moveNumber;
    this.children = [];
    this.addChildren = (node) =>{
       this.children[this.children.length] = node;
