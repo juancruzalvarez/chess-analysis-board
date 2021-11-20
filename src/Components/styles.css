@@ -75,3 +75,11 @@ body{
    grid-row: 1 /3;
    
 }
+
+.line{
+   margin-left: 10px;
+}
+
+.line:before{
+   content: '-';
+}
