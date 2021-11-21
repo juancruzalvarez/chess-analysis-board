@@ -1,19 +1,38 @@
 import Style from '../styles.css'
 import {Node} from '../../Services/moveTree'
 export function GameMovesDisplay(props){
+   let currentNode = props.moves;
+   let moveNumber = 1;
+   let whiteMove;
+   let blackMove;
+   while(currentNode){
+      whiteMove = currentNode.move;
+      blackMove = '';
+      if(currentNode.getChildren().length > 1){
+
+      }
+
+      currentNode = currentNode.getChildren()[0];
+   }
+}
+
+(<div className = 'gameMovesContainer'>
+           
+</div>)
+<SecundaryLinesDisplay node = {props.moves} indentationLevel = {1} key = {props.moves.value}/>
+
+const MainLineRowDisplay = (props) =>{
    return (
-      <div className = 'gameMovesContainer'>
-            <MoveTree node = {props.moves} indentationLevel = {1} key = {props.moves.value}/>
+      <div className = 'mainLineRowDisplay'>
+         <span>{props.moveNumber}</span>
+         <span>{props.whiteMove ? props.whiteMove : '...'}</span>
+         <span>{props.blackMove ? props.blackMove : '...'}</span>
       </div>
    );
 }
 
-const MoveDisplay = (props) =>{
-   return props.moveNumber%2 === 0 ? [<span className = 'moveDisplay'> {`${Math.floor(props.moveNumber/2)+1}`}</span>, <span className = 'moveDisplay'> {props.move}</span>] : <span className = 'moveDisplay'> {props.move}</span>;
-}
-
 //recursivly displays the tree.
-const MoveTree = (props) =>{
+const SecundaryLinesDisplay = (props) =>{
    let elements = [];
    let currentNode = props.node;
    while(currentNode && currentNode.getChildren().length < 2){
@@ -29,7 +48,7 @@ const MoveTree = (props) =>{
       
       tmp = currentNode.getChildren().map(
          (element) =>{
-            return <MoveTree node={element} key ={element.move}/>
+            return <SecundaryLinesDisplay node={element} key ={element.move}/>
          }
       );
    }
