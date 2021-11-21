@@ -58,6 +58,10 @@ body{
    margin: 0.1em 0.2em;
 
 }
+.mainLineRowDisplay{
+   display:grid;
+   grid-template-columns: 2fr 5fr 5fr;
+}
 
 .moveDisplay:hover{
    background-color: gray;
