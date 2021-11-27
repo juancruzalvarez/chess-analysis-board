@@ -45,23 +45,20 @@ body{
    width: 100%;
    overflow: hidden;
    border-radius: 0.2em;
-}
-
-.engineContainer{
-   background-color: gainsboro;
-   height: 20%;
+   display:flex;
+   flex-direction: column;
 }
 
 .gameMovesContainer{
    font-family: 'Noto Sans', Sans-Serif;
    font-size: calc(min(1.6vh,1.6vw));
-   height: 80%;
    color: #363636;
    background-color: white;
+   flex-grow: 1;
    display: flex;
    flex-direction: row;
    flex-wrap: wrap;
-   align-items: start;
+   align-items: flex-start;
    align-content: flex-start;
 }
 
@@ -70,7 +67,7 @@ body{
    background-color: #f7f6f5;
    border-right: solid 0.1em lightgray;
    width: calc(14% - 0.2em);
-   height: 2.5em;
+   height: 1.81em;
    display: flex; 
    justify-content: center;
    align-items: center;
@@ -78,7 +75,7 @@ body{
 }
 .move{
    width: 43%;
-   height: 2.5em;
+   height: 1.8em;
    display: flex; 
    justify-content: center;
    align-items: center;
@@ -91,14 +88,12 @@ body{
 
 .toolbarContainer{
    background-color: white;
-   grid-column: 3;
-   grid-row: 3;
+   grid-column: 4;
 }
 
 .anotationContainer{
    background-color: white;
    grid-column: 1;
-   grid-row: 1 /3;
    
 }
 
@@ -120,4 +115,114 @@ body{
 }
 .line:before{
    content: '-';
+}
+
+
+.engineContainer{
+   background-color: #f7f6f5;
+   font-family: 'Noto Sans', Sans-Serif; 
+   color: #4d4d4d;
+   overflow: hidden;
+   
+}
+
+.engineHeaderContainer{
+   display: flex;
+   justify-content: space-between;
+   align-content: center;
+   align-items: center;
+   min-height: 2.5em;
+   border-bottom: lightgray 0.1em solid;
+}
+.eval{
+   font-size: 1.3em;
+   font-weight: bold;
+
+   padding-top:0.4em;
+   padding-bottom: 0.4em;
+   padding-left:0.4em;
+}
+
+.engineName{
+color: rgb(95, 93, 93);
+}
+
+.switch {
+   position: relative;
+   display: inline-block;
+   width: 2.4em;
+   height: 1.6em;
+   margin: 0.5em;
+ }
+ 
+
+.switch input {
+   opacity: 0;
+   width: 0;
+   height: 0;
+ }
+ 
+ /* The slider */
+ .slider {
+   position: absolute;
+   cursor: pointer;
+   top: 0;
+   left: 0;
+   right: 0;
+   bottom: 0;
+   background-color: #ccc;
+   -webkit-transition: .4s;
+   transition: .4s;
+ }
+ 
+ .slider:before {
+   position: absolute;
+   content: "";
+   height: 1.2em;
+   width: 1.2em;
+   left: 4px;
+   bottom: 4px;
+   background-color: white;
+   -webkit-transition: .4s;
+   transition: .4s;
+ }
+ 
+ input:checked + .slider {
+   background-color: #629924;
+ }
+ 
+ input:focus + .slider {
+   box-shadow: 0 0 1px #629924;
+ }
+ 
+ input:checked + .slider:before {
+   -webkit-transform: translateX(0.85em);
+   -ms-transform: translateX(0.85em);
+   transform: translateX(0.85em);
+ }
+ 
+ /* Rounded sliders */
+ .slider.round {
+   border-radius: 1.5em;
+ }
+ 
+ .slider.round:before {
+   border-radius: 50%;
+ }
+.engineEnableButton{
+}
+
+.engineLine{
+   clear:both;
+   border-bottom: lightgray 0.1em solid;
+   color: rgb(94, 94, 94);
+   background-color: white;
+   padding: 0.2em;
+   padding-left: 0.4em;
+   text-align: left;
+   font-size: 0.791em;
+}
+
+.engineLine strong{
+   margin-right: 1em;
 }

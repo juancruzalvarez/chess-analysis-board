@@ -1,5 +1,3 @@
-import Style from '../styles.css'
-import {Node} from '../../Services/moveTree'
 
 
 export function GameMovesDisplay(props){
@@ -20,8 +18,7 @@ export function GameMovesDisplay(props){
             let tmp = [];
             tmp = parent.getChildren().slice();
             tmp.splice(0,1);
-            tmp = tmp.map((element)=> <SecundaryLinesDisplay node = {element} moveNumber ={nodeNumber} first = {true}/>);
-            console.log(tmp);
+            tmp = tmp.map((element, index)=> <SecundaryLinesDisplay node = {element} key = {index} first = {true}/>);
             elements[elements.length] = <div key={keyNumber++} className  = 'lineContainer'>{tmp}</div> ;
             elements[elements.length] = <span key={keyNumber++} className = 'index'>{nodeNumber/2}</span>;
             elements[elements.length] = <span key={keyNumber++} className = 'move'>...</span>;
@@ -29,8 +26,7 @@ export function GameMovesDisplay(props){
             let tmp = [];
             tmp = parent.getChildren().slice();
             tmp.splice(0,1);
-            tmp = tmp.map((element)=> <SecundaryLinesDisplay node = {element} moveNumber ={nodeNumber} first = {true}/>);
-            console.log(tmp);
+            tmp = tmp.map((element, index)=> <SecundaryLinesDisplay node = {element} key = {index} first = {true}/>);
             elements[elements.length] = <div key={keyNumber++} className  = 'lineContainer'>{tmp}</div> ;
          }
       }
@@ -52,21 +48,22 @@ const getFirstChildren = (node)=>{
 const SecundaryLinesDisplay = (props) =>{
    let elements = [];
    let currentNode = props.node;
+   let keyNumber = 0;
    while(currentNode && currentNode.getChildren().length < 2){
       if(currentNode.moveNumber%2 === 1){
-         elements[elements.length] = <span key = {currentNode.move+currentNode.moveNumber/2}> {Math.floor(currentNode.moveNumber/2)+1 + '.' + currentNode.move}</span>
+         elements[elements.length] = <span key = {keyNumber++}> {Math.floor(currentNode.moveNumber/2)+1 + '.' + currentNode.move}</span>
       }
       currentNode = currentNode.getChildren()[0];
    }
-   if(currentNode){elements[elements.length] = <span key = {currentNode.value}>{currentNode.move} </span>;}
+   if(currentNode){elements[elements.length] = <span key = {keyNumber++}>{currentNode.move} </span>;}
    let tmp = [];
    if(currentNode && currentNode.getChildren().length > 1){
       
       tmp = currentNode.getChildren().map(
          (element) =>{
-            return <SecundaryLinesDisplay node={element} key ={element.move} first = {false}/>
+            return <SecundaryLinesDisplay key = {keyNumber++} node={element} first = {false}/>
          }
       );
    }
-   return [elements.length !== 0 && <div className = 'line' key = {elements[0].move + currentNode}>{elements.concat(tmp)}</div>];
+   return [elements.length !== 0 && <div className = 'line' key = {keyNumber++}>{elements.concat(tmp)}</div>];
 }

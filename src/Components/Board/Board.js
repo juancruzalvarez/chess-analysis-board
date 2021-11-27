@@ -1,19 +1,20 @@
-import {useState} from 'react'
-import { startPosition } from '../../Services/chess'
-import styles from '../styles.css'
 import { pieceImages } from '../../Assets/ImagesIndex';
+import { moveType } from '../../Services/chess';
 
 export function Board(props){
    return (
-      <div className='chessboard'>
+      <div ref = {props.boardReference} className='chessboard' onMouseDown = {props.onMouseDown} onMouseUp = {props.onMouseUp} onMouseMove = {props.onMouseMove}>
          {
             props.board.map((element, index) =>{
                let row = Math.floor(index/8);
                let col = index%8;
-               return <Square key     = {index}
+               return <Square id =      {index}
+                              key     = {index}
                               shade   = {(row+col)&1 ? 'ligth' : 'dark'}
                               piece   = {element}
-                              onClick = {() => this.handleOnClick(index)}
+                              pieceSize = {props.pieceSize}
+                              grabbed = {props.grabbedPiece === index}
+                              mousePosition = {props.mousePosition}
                         />
             })
          }
@@ -30,12 +31,24 @@ const Square = (props) =>{
       backgroundImage: `url(${pieceImages[props.piece]})`,
       backgroundSize: '80%',
       backgroundPosition:'center',
-      backgroundRepeat: 'no-repeat'
+      backgroundRepeat: 'no-repeat',
+      position:'',
+      top:'',
+      left:''
    } 
+
+   if(props.grabbed){
+      style.width = props.pieceSize+'px';
+      style.height = props.pieceSize+'px';
+      style.position = 'absolute';
+      style.top = props.mousePosition.y-props.pieceSize/2;
+      style.left = props.mousePosition.x-props.pieceSize/2;
+
+   }
    return (
-   <div className= {'square ' + props.shade}>
+   <div   className= {'square ' + props.shade}>
       {
-      props.piece && <div style={style}></div>
+      props.piece && <div id = {props.id} style={style}></div>
       }
    </div>
    );
