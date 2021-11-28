@@ -454,3 +454,11 @@ const getOpositeColor = (color) =>{
    return colors.NO_COLOR;
 };
 
+export const getPositionFromFEN = (fen) =>{
+   let split = fen.split(' ');
+   let board = split[0].replaceAll('/', '');
+   let boardArray = [];
+   for(let i = 0; i<board.length; i++){
+      
+   }
+}

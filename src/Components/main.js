@@ -35,6 +35,7 @@ export const Analysis = (props) =>{
    e5.addChildren(nc3);
    e4.addChildren(e5);
    root.addChildren(e4);   
+
    const [position, setPosition] = useState(startPosition);
    const [moveTree, setMoveTree] = useState(root);
    const [selectedSquare, setSelectedSquare] = useState(null);
@@ -50,6 +51,7 @@ export const Analysis = (props) =>{
       let y = Math.floor(8 * ( (clientY-boundingRect.top)/boundingRect.height ) );
       return y*8 + x;
    }
+   
    const handleOnMouseDown = (e) =>{
       let index = getBoardSquare(e.clientX, e.clientY);
       if(position.board[index]){
