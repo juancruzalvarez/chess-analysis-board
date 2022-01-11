@@ -1,24 +1,28 @@
-
+const getFirstChildren = (node)=>{
+   return node.getChildren()[0];
+}
 
 export function GameMovesDisplay(props){
    let keyNumber = 0;
    let elements = [];
    let parent = props.moves;
    let currentNode = getFirstChildren(props.moves);
-   let nodeNumber = 2;
+   let nodeNumber = currentNode && Math.floor(currentNode.position.halfMoves/2);
 
    while(currentNode){
       if(nodeNumber%2 === 0){
          elements[elements.length] = <span key={keyNumber++} className = 'index' >{nodeNumber/2}</span>;
       }
-      elements[elements.length] = <span key={keyNumber++} className = 'move'>{currentNode.move}</span>;
+      let id = currentNode.id;
+      let pos = currentNode.position;
+      elements[elements.length] = <span  onClick = {()=>props.onClickNode(id, pos)} key={keyNumber++} className = 'move'>{currentNode.move}</span>;
       if(parent.getChildren().length>1){
          if(nodeNumber%2 === 0){
             elements[elements.length] = <span key={keyNumber++} className = 'move'>...</span>;
             let tmp = [];
             tmp = parent.getChildren().slice();
             tmp.splice(0,1);
-            tmp = tmp.map((element, index)=> <SecundaryLinesDisplay node = {element} key = {index} first = {true}/>);
+            tmp = tmp.map((element, index)=>  <SecundaryLinesDisplay node = {element} key = {index} first = {true}/>);
             elements[elements.length] = <div key={keyNumber++} className  = 'lineContainer'>{tmp}</div> ;
             elements[elements.length] = <span key={keyNumber++} className = 'index'>{nodeNumber/2}</span>;
             elements[elements.length] = <span key={keyNumber++} className = 'move'>...</span>;
@@ -39,9 +43,7 @@ export function GameMovesDisplay(props){
    </div>);
 }
 
-const getFirstChildren = (node)=>{
-   return node.getChildren()[0];
-}
+
 
 
 //recursivly displays the tree.
@@ -50,9 +52,9 @@ const SecundaryLinesDisplay = (props) =>{
    let currentNode = props.node;
    let keyNumber = 0;
    while(currentNode && currentNode.getChildren().length < 2){
-      if(currentNode.moveNumber%2 === 1){
-         elements[elements.length] = <span key = {keyNumber++}> {Math.floor(currentNode.moveNumber/2)+1 + '.' + currentNode.move}</span>
-      }
+      let str = currentNode.position.halfMoves%2 === 1 ? (Math.floor(currentNode.position.halfMoves/2)+1 +'.') :'';
+      str += currentNode.move;
+      elements[elements.length] = <span key = {keyNumber++}> {str}</span>
       currentNode = currentNode.getChildren()[0];
    }
    if(currentNode){elements[elements.length] = <span key = {keyNumber++}>{currentNode.move} </span>;}

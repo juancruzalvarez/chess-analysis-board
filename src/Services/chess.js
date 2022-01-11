@@ -1,3 +1,5 @@
+import { parseInt } from "lodash";
+
 const squares = {
    a8: 0,
    b8: 1,
@@ -50,15 +52,11 @@ export const startPosition = {
       'P','P','P','P','P','P','P','P', 
       'R','N','B','Q','K','B','N','R'],
    move: colors.WHITE,                             //whose move it is in the position
-   castlingPrivileges:{                   //determinates how can white and black castle, based on if the king or rooks have moved.
-      whiteShort: true,
-      whiteLong:true,   
-      blackShort:true,           
-      blackLong:true
-   },
-   enpassantSquare: null,                  //holds the square witch can be captured enpassant, for most of the game null
-   fiftyMoveRuleCount:0                    //holds the number of moves without captures or pawn pushes    
-};
+   castlingPrivileges:'kqKQ',                  //determinates how can white and black castle, based on if the king or rooks have moved.
+   enpassantSquare: null,                  //holds the square witch can be captured enpassant, for most of the game null.
+   fiftyMoveRuleCount:0,                    //holds the number of moves without captures or pawn pushes.
+   halfMoves:0                               //number of halfmoves since the start of the game.
+}; 
 
 export const isMoveValid = (position, moveStart, moveEnd) =>{
    let start = {                                                       
@@ -179,7 +177,7 @@ export const isMoveValid = (position, moveStart, moveEnd) =>{
                //castle
                if(start.square.x > end.square.x){
                   if(start.pieceColor === colors.WHITE && 
-                     (!position.castlingPrivileges.whiteLong ||
+                     (!position.castlingPrivileges.includes('Q')||
                      position.board[squares.d1] !== pieces.NO_PIECE ||
                      position.board[squares.c1] !== pieces.NO_PIECE ||
                      position.board[squares.b1] !== pieces.NO_PIECE ||
@@ -187,7 +185,7 @@ export const isMoveValid = (position, moveStart, moveEnd) =>{
                      return false;
                   }
                   if(start.pieceColor === colors.BLACK &&
-                     (!position.castlingPrivileges.blackLong ||
+                     (!position.castlingPrivileges.includes('q') ||
                      position.board[squares.d8]!== pieces.NO_PIECE ||
                      position.board[squares.c8]!== pieces.NO_PIECE ||
                      position.board[squares.b8] !== pieces.NO_PIECE ||
@@ -196,14 +194,14 @@ export const isMoveValid = (position, moveStart, moveEnd) =>{
                   }
                }else{
                   if(start.pieceColor === colors.WHITE &&
-                     (!position.castlingPrivileges.whiteShort ||
+                     (!position.castlingPrivileges.includes('k') ||
                      position.board[squares.f1]!== pieces.NO_PIECE ||
                      position.board[squares.g1]!== pieces.NO_PIECE ||
                          isAttackedBy(position.board,squares.f1,getOpositeColor(start.pieceColor)))){
                      return false;
                   }
                   if(start.pieceColor === colors.BLACK &&
-                     (!position.castlingPrivileges.blackShort ||
+                     (!position.castlingPrivileges.includes('K') ||
                      position.board[squares.f8]!== pieces.NO_PIECE ||
                      position.board[squares.g8]!== pieces.NO_PIECE ||
                      isAttackedBy(position.board,squares.f8,getOpositeColor(start.pieceColor)))){
@@ -276,7 +274,7 @@ export const doMove = (board, moveStart, moveEnd) =>{    //ionly changes board p
    
 };
 
-export const performMove = (position, moveStart, moveEnd) =>{  //updates the entire position (really does the move)
+export const performMove = (position, moveStart, moveEnd) =>{  //updates the entire position (really does the move) and return the move in algebraic notation
 
    let start = {                                                        //starting square of the move
       square: coord1Dto2D(moveStart),
@@ -291,6 +289,7 @@ export const performMove = (position, moveStart, moveEnd) =>{  //updates the ent
    };
    let pieceType = getPieceType(start.piece);
 
+   position.fiftyMoveRuleCount++;
    if(pieceType === pieces.PAWN ){      
       position.fiftyMoveRuleCount = 0; //update fifty move rule count
       if(Math.abs(end.square.y-start.square.y) === 2){
@@ -300,29 +299,31 @@ export const performMove = (position, moveStart, moveEnd) =>{  //updates the ent
       }
    }else if(pieceType === pieces.KING){
       if(start.pieceColor === colors.WHITE){
-         position.castlingPrivileges.whiteLong = false;
-         position.castlingPrivileges.whiteShort = false;
+         position.castlingPrivileges.replace('K','');
+         position.castlingPrivileges.replace('Q','');
       }else{
-         position.castlingPrivileges.blackLong = false;
-         position.castlingPrivileges.blackShort = false;
+         position.castlingPrivileges.replace('k','');
+         position.castlingPrivileges.replace('Q','');
       }
    }else if(pieceType === pieces.ROOK){
       if(start.pieceColor === colors.WHITE){
          if(moveStart === squares.a1){
-            position.castlingPrivileges.whiteLong = false;
+            position.castlingPrivileges.replace('Q','');
          }else if(moveStart === squares.h1){
-            position.castlingPrivileges.whiteShort = false;
+            position.castlingPrivileges.replace('K','');
          }
       }else{
          if(moveStart === squares.a8){
-            position.castlingPrivileges.blackLong = false;
+            position.castlingPrivileges.replace('q','');
          }else if(moveStart === squares.h8){
-            position.castlingPrivileges.blackShort = false;
+            position.castlingPrivileges.replace('k','');
          }
       }
    }
    position.move = getOpositeColor(position.move);
+   position.halfMoves++;
    doMove(position.board, moveStart, moveEnd);
+   return pieceType.toUpperCase() +(end.piece !==pieces.NO_PIECE ? 'x' :'')+indexToSquareNotation(moveEnd)+ (isOnCheck(position.board, position.move) ? '+':'');
 }
 
 const checkPath = (board, startX, startY, endX, endY)=>{    //returns the first piece on the path
@@ -455,10 +456,75 @@ const getOpositeColor = (color) =>{
 };
 
 export const getPositionFromFEN = (fen) =>{
+   let position = {};
+   position.board = [];
    let split = fen.split(' ');
    let board = split[0].replaceAll('/', '');
-   let boardArray = [];
+   let index = 0;
    for(let i = 0; i<board.length; i++){
-      
+      let number = parseInt(board[i]);
+      if(isNaN(number)){
+         position.board[index] = board[i];
+         index++;
+      }else{
+         for(let j = index; j< index+number; j++){
+            position.board[j] = null;
+         }
+         index+=number;
+      }
    }
+   position.move = split[1];
+   position.castlingPrivileges = split[2];
+   position.enpassantSquare = split[3] === '-' ? null : squareNotationToIndex(split[3]);
+   position.fiftyMoveRuleCount = parseInt(split[4]);
+   console.log(position.board);
+}
+
+export const getFENfromPosition = (position) =>{
+   let FEN = '';
+   let rowCount = 0;
+   let emptyCount = 0;
+   for(let i = 0; i<64;i++){
+      if(position.board[i]){
+         if(emptyCount){
+            FEN +=emptyCount;
+            emptyCount = 0;
+         }
+         FEN += position.board[i];
+      }else{
+         emptyCount++;
+      }
+      rowCount++;
+      if(rowCount === 8){
+         if(emptyCount){
+            FEN += emptyCount;
+            emptyCount = 0;
+         }
+         FEN += '/';
+         rowCount = 0;
+      }
+   }
+
+   FEN += ' ';
+   FEN += position.move;
+   FEN += ' ';
+   FEN += position.castlingPrivileges;
+   FEN += ' ';
+   FEN += position.enpassantSquare ? indexToSquareNotation(position.enpassantSquare) : '-';
+   FEN += ' ';
+   FEN += position.fiftyMoveRuleCount;
+   FEN += ' ';
+   FEN += '0';
+   return FEN;
+}
+
+export const squareNotationToIndex = (square) => {
+   //console.log(square[0], square.charCodeAt(0));
+   return ( 8-parseInt(square[1]) )*8 + square.charCodeAt(0) - 97;
+}
+
+export const indexToSquareNotation = (index) =>{
+   let x = index % 8;
+   let y = Math.floor(index/8);
+   return String.fromCharCode(x+97).concat(8-y);
 }
