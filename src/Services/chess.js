@@ -287,6 +287,7 @@ export const performMove = (position, moveStart, moveEnd) =>{  //updates the ent
       piece: position.board[moveEnd],                                 //piece to move
       pieceColor: getPieceColor(position.board[moveEnd])
    };
+   let moveNotation = getMoveNotation(position, start, end);
    let pieceType = getPieceType(start.piece);
 
    position.fiftyMoveRuleCount++;
@@ -322,8 +323,32 @@ export const performMove = (position, moveStart, moveEnd) =>{  //updates the ent
    }
    position.move = getOpositeColor(position.move);
    position.halfMoves++;
+   
    doMove(position.board, moveStart, moveEnd);
-   return pieceType.toUpperCase() +(end.piece !==pieces.NO_PIECE ? 'x' :'')+indexToSquareNotation(moveEnd)+ (isOnCheck(position.board, position.move) ? '+':'');
+   return moveNotation + (isOnCheck(position.board, position.move) ? '+':'');
+}
+
+const getMoveNotation = (position, start, end) =>{
+
+
+   let movedPieceType = getPieceType(start.piece);
+   if(movedPieceType === pieces.PAWN){
+      console.log('wat');
+      if(end.piece !== pieces.NO_PIECE || coord2Dto1D(end.square.x, end.square.y) === position.enpassantSquare){
+         return indexToSquareNotation(coord2Dto1D(start.square.x, start.square.y))[0]+'x'+indexToSquareNotation(coord2Dto1D(end.square.x, end.square.y));
+      }else{
+         return indexToSquareNotation(coord2Dto1D(end.square.x, end.square.y));
+      }
+   }else if(movedPieceType === pieces.KING && (Math.abs(start.square.x-end.square.x) >1 || Math.abs(end.square.y-start.square.y) > 1)){
+      if(end.square.x > start.square.x){
+         return 'O-O'
+      }else{
+         return 'O-O-O'
+      }
+   }else{
+      return movedPieceType.toUpperCase() + (end.piece !== pieces.NO_PIECE ? 'x' : '') + indexToSquareNotation(coord2Dto1D(end.square.x, end.square.y));
+   }
+
 }
 
 const checkPath = (board, startX, startY, endX, endY)=>{    //returns the first piece on the path
