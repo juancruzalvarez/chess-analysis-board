@@ -19,16 +19,7 @@ export const Analysis = (props) =>{
    const [newNodeID, setNewNodeID] = useState(1);
    const boardRef = useRef();
 
-   const upHandler = () =>{
-      console.log(moveTree);
-   }
-   useEffect(() => {
-      window.addEventListener("keyup", upHandler);
-      // Remove event listeners on cleanup
-      return () => {
-        window.removeEventListener("keyup", upHandler);
-      };
-    }, []);
+ 
    const getBoardSquare = (clientX, clientY) =>{
       const boardElement = boardRef.current;
       const boundingRect = boardElement.getBoundingClientRect();
