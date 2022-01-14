@@ -1,5 +1,8 @@
 import { parseInt } from "lodash";
-
+/*
+*        FIX BUG WHERE KINGS DONW ALLOW ENEMY KING TO MOVE
+*
+*/ 
 const squares = {
    a8: 0,
    b8: 1,
@@ -252,7 +255,6 @@ export const doMove = (board, moveStart, moveEnd) =>{    //ionly changes board p
       }
    }else if(getPieceType(start.piece)===pieces.KING && Math.abs(start.square.x-end.square.x) >1){                                                                              //handle castle and promotion
       let rank = start.pieceColor === colors.WHITE ? 7 : 0;
-      console.log(rank);
       if(start.square.x-end.square.x >0){
          board[moveStart] = pieces.NO_PIECE;
          board[coord2Dto1D(0,rank)] = pieces.NO_PIECE;
@@ -261,11 +263,8 @@ export const doMove = (board, moveStart, moveEnd) =>{    //ionly changes board p
       }else{
          board[moveStart] = pieces.NO_PIECE;
          board[coord2Dto1D(7,rank)] = pieces.NO_PIECE;
-         console.log(coord2Dto1D(7,rank));
          board[coord2Dto1D(6,rank)] = getPieceOfColor(pieces.KING, start.pieceColor);
-         console.log(coord2Dto1D(6,rank));
          board[coord2Dto1D(5,rank)] = getPieceOfColor(pieces.ROOK, start.pieceColor);
-         console.log(coord2Dto1D(5,rank));
       } 
    }else{
       board[moveEnd] = board[moveStart];  
@@ -333,7 +332,6 @@ const getMoveNotation = (position, start, end) =>{
 
    let movedPieceType = getPieceType(start.piece);
    if(movedPieceType === pieces.PAWN){
-      console.log('wat');
       if(end.piece !== pieces.NO_PIECE || coord2Dto1D(end.square.x, end.square.y) === position.enpassantSquare){
          return indexToSquareNotation(coord2Dto1D(start.square.x, start.square.y))[0]+'x'+indexToSquareNotation(coord2Dto1D(end.square.x, end.square.y));
       }else{
@@ -349,6 +347,23 @@ const getMoveNotation = (position, start, end) =>{
       return movedPieceType.toUpperCase() + (end.piece !== pieces.NO_PIECE ? 'x' : '') + indexToSquareNotation(coord2Dto1D(end.square.x, end.square.y));
    }
 
+}
+
+export const longToShortAlgebraicNotation = (position, notation) =>{
+   let startSquare = squareNotationToIndex(notation.substring(0,2));
+   let endSquare = squareNotationToIndex(notation.substring(2,4));
+   let start = {                                                        //starting square of the move
+      square: coord1Dto2D(startSquare),
+      piece: position.board[startSquare],                                 //piece to move
+      pieceColor: getPieceColor(position.board[startSquare])
+   };
+
+   let end = {                                                        //starting square of the move
+      square: coord1Dto2D(endSquare),
+      piece: position.board[endSquare],                                 //piece to move
+      pieceColor: getPieceColor(position.board[endSquare])
+   };
+   return getMoveNotation(position, start, end);
 }
 
 const checkPath = (board, startX, startY, endX, endY)=>{    //returns the first piece on the path
@@ -502,7 +517,6 @@ export const getPositionFromFEN = (fen) =>{
    position.castlingPrivileges = split[2];
    position.enpassantSquare = split[3] === '-' ? null : squareNotationToIndex(split[3]);
    position.fiftyMoveRuleCount = parseInt(split[4]);
-   console.log(position.board);
 }
 
 export const getFENfromPosition = (position) =>{
@@ -544,7 +558,6 @@ export const getFENfromPosition = (position) =>{
 }
 
 export const squareNotationToIndex = (square) => {
-   //console.log(square[0], square.charCodeAt(0));
    return ( 8-parseInt(square[1]) )*8 + square.charCodeAt(0) - 97;
 }
 
