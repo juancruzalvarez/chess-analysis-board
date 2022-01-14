@@ -146,6 +146,10 @@ body{
    padding-left:0.4em;
 }
 
+.depth{
+   font-size:0.8em;
+}
+
 .engineName{
 color: rgb(95, 93, 93);
 }
@@ -212,8 +216,6 @@ color: rgb(95, 93, 93);
  .slider.round:before {
    border-radius: 50%;
  }
-.engineEnableButton{
-}
 
 .engineLine{
    clear:both;
