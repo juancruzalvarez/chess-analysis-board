@@ -1,7 +1,7 @@
 import {useState, useRef, useEffect} from 'react'
 //eslint-disable-next-line
 import Style from './styles.css'
-import { startPosition, isMoveValid, performMove, getPositionFromFEN, squareNotationToIndex, indexToSquareNotation, getFENfromPosition, moveType} from '../Services/chess';
+import { startPosition, isMoveValid, performMove, getPositionFromFEN, squareNotationToIndex, indexToSquareNotation, getFENfromPosition, moveType, colors} from '../Services/chess';
 import {Board} from './Board/Board'
 import {GameMovesDisplay}from './GameMovesDisplay/GameMovesDisplay'
 import {Node, searchNode, insertNode} from  '../Services/moveTree'
@@ -22,7 +22,26 @@ export const Analysis = (props) =>{
    useEffect(()=>{
       stockfishRef.current = new Worker("/stockfish.js");
       stockfishRef.current.onmessage = function(event) {
-         console.log(event.data ? event.data : event);
+         let data = [];
+         let depth;
+         let score;
+         let line;
+         if(event.data){
+            data = event.data.split(' ');
+            if(data[0] === 'info'){
+               depth = data[data.findIndex((element) => element === 'depth')+1];
+               score = data[data.findIndex((element) => element === 'cp')+1];
+               line = data.splice(data.findIndex((element) => element === 'pv')+1).join(' ');
+               let lineNumber = data[data.findIndex((element) => element === 'multipv')+1] -1;
+               let newEngineLines = [...engineLines];
+               console.log(score);
+               console.log(position.move);
+               newEngineLines[lineNumber].score = score;
+               newEngineLines[lineNumber].line = line;
+               setEngineLines(newEngineLines);
+            }
+         }
+         
       };
       stockfishRef.current.postMessage('uci');
       stockfishRef.current.postMessage('setoption name MultiPV value 3');
@@ -73,7 +92,7 @@ export const Analysis = (props) =>{
       setCurrentNodeID(clickedNodeId);
       setPosition(clickedNodePosition);
    }
-
+   console.log(position.move);
    return (
    <div className ='mainContainer'>
       <div className = 'anotationContainer'></div>
@@ -92,9 +111,13 @@ export const Analysis = (props) =>{
       <div className = 'rightContainer'>
 
          <EngineEvaluation 
-            eval = '+2.1' 
-            line1 = '4.nf3 nf6 5.kg2 bc4 6.o-o ...' line2 = '4.qf3 bf3 5.ng2 kc4 6.o-o ...' line3 = '4.bf3 bf3 5.kg3 kc4 6.o-o-o ...' 
-            line1Eval = '+2.4' line2Eval = '-2.1' line3Eval = '-0.2'
+            eval = {position.move === colors.WHITE ? engineLines[0].score/100 : -(engineLines[0].score/100)} 
+            line1 = {engineLines[0].line} 
+            line2 = {engineLines[1].line} 
+            line3 = {engineLines[2].line} 
+            line1Eval = {position.move === colors.WHITE ? engineLines[0].score/100 : -(engineLines[0].score/100)}
+            line2Eval = {position.move === colors.WHITE ? engineLines[1].score/100 : -(engineLines[1].score/100)}
+            line3Eval = {position.move === colors.WHITE ? engineLines[2].score/100 : -(engineLines[2].score/100)} 
          />
 
          <GameMovesDisplay moves = {moveTree} onClickNode = {handleOnClickNode} selectedNode ={currentNodeID}/>
