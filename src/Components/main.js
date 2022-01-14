@@ -8,7 +8,6 @@ import {Node, searchNode, insertNode} from  '../Services/moveTree'
 import { EngineEvaluation } from './EngineEvaluation/EngineEvaluation';
 import {cloneDeep} from 'lodash';
 
-
 export const Analysis = (props) =>{
    
    const [position, setPosition] = useState(startPosition);
@@ -17,8 +16,19 @@ export const Analysis = (props) =>{
    const [mousePosition, setMousePosition] = useState({x:0,y:0});
    const [currentNodeID, setCurrentNodeID] = useState(0);
    const [newNodeID, setNewNodeID] = useState(1);
+   const [engineLines, setEngineLines] = useState([{score:'',line:''}, {score:'',line:''}, {score:'',line:''}]);
    const boardRef = useRef();
-
+   const stockfishRef = useRef();
+   useEffect(()=>{
+      stockfishRef.current = new Worker("/stockfish.js");
+      stockfishRef.current.onmessage = function(event) {
+         console.log(event.data ? event.data : event);
+      };
+      stockfishRef.current.postMessage('uci');
+      stockfishRef.current.postMessage('setoption name MultiPV value 3');
+      stockfishRef.current.postMessage('ucinewgame');
+      console.log('stockfish init ONLY ONCE');
+   },[]);
  
    const getBoardSquare = (clientX, clientY) =>{
       const boardElement = boardRef.current;
@@ -47,7 +57,10 @@ export const Analysis = (props) =>{
          setMoveTree(newMoveTree);
          setCurrentNodeID(newNodeID);
          setNewNodeID(newNodeID + 1);
-
+         console.log('fen:' +getFENfromPosition(newPosition));
+         stockfishRef.current.postMessage('stop');
+         stockfishRef.current.postMessage('position fen '+getFENfromPosition(newPosition));
+         stockfishRef.current.postMessage('go depth 16');
       }
       setSelectedSquare(null);
    }
@@ -84,7 +97,7 @@ export const Analysis = (props) =>{
             line1Eval = '+2.4' line2Eval = '-2.1' line3Eval = '-0.2'
          />
 
-         <GameMovesDisplay moves = {moveTree} onClickNode = {handleOnClickNode}/>
+         <GameMovesDisplay moves = {moveTree} onClickNode = {handleOnClickNode} selectedNode ={currentNodeID}/>
 
       </div>
          

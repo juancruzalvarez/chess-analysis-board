@@ -105,7 +105,7 @@ body{
 }
 
 .line{
-   padding-left: 10px;
+   padding-left: 0.9em;
    padding-top: 0.3em;
    padding-bottom: 0.3em;
 }
@@ -114,9 +114,12 @@ body{
    color: white;
 }
 .line:before{
-   content: '-';
+   content: '- ';
 }
-
+.selectedNode{
+   background-color: rgb(91, 129, 243);
+   color: white;
+}
 
 .engineContainer{
    background-color: #f7f6f5;
