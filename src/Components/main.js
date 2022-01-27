@@ -42,12 +42,15 @@ export const Analysis = (props) =>{
       let data = [];
       let depth;
       let score;
+      let mate;
       let line;
       if(event.data){
          data = event.data.split(' ');
          if(data[0] === 'info'){
             depth = data[data.findIndex((element) => element === 'depth')+1];
             score = data[data.findIndex((element) => element === 'cp')+1]/100;
+            let i = data.findIndex((element) => element === 'mate');
+            mate = i !== -1 ? data[i+1] : null;
             let tmp = cloneDeep(position);
             line = data.splice(data.findIndex((element) => element === 'pv')+1).map(
                (element) =>{
@@ -57,7 +60,7 @@ export const Analysis = (props) =>{
                }).join(' ');
             let lineNumber = data[data.findIndex((element) => element === 'multipv')+1] -1;
             let newEngineLines = [...engineLines];
-            newEngineLines[lineNumber].score = position.move === 'w'? score: -score;
+            newEngineLines[lineNumber].score = mate ? '#'+mate : (position.move === 'w'? score: -score);
             newEngineLines[lineNumber].line = line;
             setEngineLines(newEngineLines);
             setSearchDepth(depth);

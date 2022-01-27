@@ -44,6 +44,7 @@ export const moveType ={
    CASTLE_MOVE:'CASTLE_MOVE',
 }
 
+
 export const startPosition = {
    board: 
       ['r','n','b','q','k','b','n','r',   //array holding pieces positions
@@ -364,6 +365,43 @@ export const longToShortAlgebraicNotation = (position, notation) =>{
       pieceColor: getPieceColor(position.board[endSquare])
    };
    return getMoveNotation(position, start, end);
+}
+
+const KNIGTH_OFFSETS = [-10,-17,-15,-6,10,17,15,5];
+
+const generateMoves = (position, options) =>{
+   let moves = [];
+   let us = position.move;
+   let them = getOpositeColor(us);
+   
+   for( let square = squares.a8; square < squares.h1; square++){
+      if(position.board[square].color === us){
+         let piece = getPieceType(position.board[square]);
+         if(piece === pieces.PAWN){
+
+         }else if(piece === pieces.KING){
+            KNIGTH_OFFSETS.forEach( (offset)=>{
+               let newSquare = square+offset;
+               if(newSquare=>a8 && newSquare<=h1){
+                  moves.push({from:square, to:newSquare, prom:null});
+               }
+            });
+         }else if(piece === pieces.KNIGTH){
+
+         }else{
+            if(piece === pieces.ROOK || piece === pieces.QUEEN){
+
+            }
+
+            if(piece === pieces.BISHOP || piece === pieces.QUEEN){
+
+            }
+
+         }  
+      }
+   }
+
+   return moves;
 }
 
 const checkPath = (board, startX, startY, endX, endY)=>{    //returns the first piece on the path
