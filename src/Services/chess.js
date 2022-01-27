@@ -367,7 +367,13 @@ export const longToShortAlgebraicNotation = (position, notation) =>{
    return getMoveNotation(position, start, end);
 }
 
-const KNIGTH_OFFSETS = [-10,-17,-15,-6,10,17,15,5];
+const PIECES_OFFSETS = {
+  'n': [-10,-17,-15,-6,10,17,15,5],
+  'b': [-9,7,-7,9],
+  'r': [-1,1,8,-8],
+  'q': [-9,7,-7,9,-1,1,8,-8],
+  'k': [-9,7,-7,9,-1,1,8,-8]
+};
 
 const generateMoves = (position, options) =>{
    let moves = [];
@@ -378,31 +384,40 @@ const generateMoves = (position, options) =>{
       if(position.board[square].color === us){
          let piece = getPieceType(position.board[square]);
          if(piece === pieces.PAWN){
-
-         }else if(piece === pieces.KING){
-            KNIGTH_OFFSETS.forEach( (offset)=>{
-               let newSquare = square+offset;
-               if(newSquare=>a8 && newSquare<=h1){
-                  moves.push({from:square, to:newSquare, prom:null});
+            if(us === colors.WHITE){
+               if(getPieceType(position.board[square-8]) === pieces.NO_PIECE){
+                  moves.push({from:square, to:square-8, prom:null});
                }
+            }else{
+
+            }
+         }else {
+            PIECES_OFFSETS[piece].forEach((element) => {
+               let i = square;
+               white(i<squares.h1){
+                  i+=element;
+                  let p = position.board[i];
+                  if(p === pieces.NO_PIECE){
+                     moves.push({from:square, to:i, prom:null});
+                  }else if(getPieceColor(p) === them){
+                     moves.push({from:square, to:i, prom:null});
+                     break;
+                  }else{
+                     break;
+                  }
+                  if(piece === pieces.KNIGTH || piece === pieces.KING){
+                     break;
+                  }
+               }
+               
             });
-         }else if(piece === pieces.KNIGTH){
-
-         }else{
-            if(piece === pieces.ROOK || piece === pieces.QUEEN){
-
-            }
-
-            if(piece === pieces.BISHOP || piece === pieces.QUEEN){
-
-            }
-
          }  
       }
    }
 
    return moves;
 }
+
 
 const checkPath = (board, startX, startY, endX, endY)=>{    //returns the first piece on the path
    let stepX = Math.sign(endX-startX);
