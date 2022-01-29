@@ -381,17 +381,39 @@ const generateMoves = (position, options) =>{
    let moves = [];
    let us = position.move;
    let them = getOpositeColor(us);
-   let secondRank = us === colors.WHITE ? 1 : 7;
+   let secondRank = us === colors.WHITE ? 6 : 1;
+   let firstRank = us === colors.WHITE ? 7 : 0;
    for( let i = squares.a8; i <= squares.h1; i++){
       let square = coord1Dto2D(i);
       if(position.board[i].color === us){
          let piece = getPieceType(position.board[i]);
          if(piece === pieces.PAWN){
-
-            if(getPieceType(position.board[i-8]) === pieces.NO_PIECE){
-               moves.push({from:i, to:i-8, prom:null});
+            let tmp = square;
+            //forwards one square
+            tmp.y += PIECES_OFFSETS[pieces.PAWN][us];
+            if(getPieceType(position.board[coord2Dto1D(tmp)]) === pieces.NO_PIECE){
+               moves.push({from:i, to:coord2Dto1D(tmp), prom:null});
             }
-
+            //attack left
+            tmp.x -=1;
+            if( onBounds(tmp) && 
+            (getPieceColor(position.board[coord2Dto1D(tmp)] === them ||
+             position.enpassantSquare === coord2Dto1D(tmp)))){
+               moves.push({from:i, to:coord2Dto1D(tmp), prom:null});
+            }
+            //atack right
+            tmp.x+=2;
+            if( onBounds(tmp) && 
+            (getPieceColor(position.board[coord2Dto1D(tmp)] === them ||
+             position.enpassantSquare === coord2Dto1D(tmp)))){
+               moves.push({from:i, to:coord2Dto1D(tmp), prom:null});
+            }
+            //long pawn move
+            tmp.x-=1;
+            tmp.y+=PIECES_OFFSETS[pieces.PAWN][us];
+            if(square.y === secondRank && getPieceType(position.board[coord2Dto1D(tmp)]) === pieces.NO_PIECE){
+               moves.push({from:i, to:coord2Dto1D(tmp), prom:null});
+            }
          }else {
             PIECES_OFFSETS[piece].forEach((element) => {
                let j = square;
@@ -413,7 +435,33 @@ const generateMoves = (position, options) =>{
                   }
                }
             });
-         }  
+         }
+         //kingside castling
+         if(piece === pieces.KING && position.castlingPrivileges.includes(us === colors.WHITE?'K':'k')){
+            let e = {x:4, y:firstRank};
+            let f = {x:5, y:firstRank};
+            let g = {x:5, y:firstRank};
+            if(getPieceType(coord2Dto1D(f)===pieces.NO_PIECE)&&
+               getPieceType(coord2Dto1D(g)===pieces.NO_PIECE)&&
+               !isAttackedBy(position.board,e,them)&&
+               !isAttackedBy(position.board,g,them)){
+                  moves.push({from:i, to:coord2Dto1D(g), prom:null});
+               }
+         }
+         //queenside castling
+         if(piece === pieces.KING && position.castlingPrivileges.includes(us === colors.WHITE?'Q':'q')){
+            let e = {x:4, y:firstRank};
+            let d = {x:3, y:firstRank};
+            let c = {x:2, y:firstRank};
+            let b = {x:1, y:firstRank};
+            if(getPieceType(coord2Dto1D(d)===pieces.NO_PIECE)&&
+               getPieceType(coord2Dto1D(c)===pieces.NO_PIECE)&&
+               getPieceType(coord2Dto1D(b)===pieces.NO_PIECE)&&
+               !isAttackedBy(position.board,e,them)&&
+               !isAttackedBy(position.board,d,them)){
+                  moves.push({from:i, to:coord2Dto1D(c), prom:null});
+               }
+         }
       }
    }
 
