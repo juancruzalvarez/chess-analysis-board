@@ -368,39 +368,42 @@ export const longToShortAlgebraicNotation = (position, notation) =>{
 }
 
 const PIECES_OFFSETS = {
-  'n': [-10,-17,-15,-6,10,17,15,5],
-  'b': [-9,7,-7,9],
-  'r': [-1,1,8,-8],
-  'q': [-9,7,-7,9,-1,1,8,-8],
-  'k': [-9,7,-7,9,-1,1,8,-8]
+  'p': {'w':-1,'b':1},
+  'n': [{x:1,y:2},{x:1,y:-2},{x:-1,y:2},{x:-1,y:-2},{x:2,y:1},{x:2,y:-1},{x:-2,y:1},{x:-2,y:-1},],
+  'b': [{x:1,y:1},{x:1,y:-1},{x:-1,y:1},{x:-1,y:-1}],
+  'r': [{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}],
+  'q': [{x:1,y:1},{x:1,y:-1},{x:-1,y:1},{x:-1,y:-1},{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}],
+  'k': [{x:1,y:1},{x:1,y:-1},{x:-1,y:1},{x:-1,y:-1},{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}]
 };
+
 
 const generateMoves = (position, options) =>{
    let moves = [];
    let us = position.move;
    let them = getOpositeColor(us);
-   
-   for( let square = squares.a8; square < squares.h1; square++){
-      if(position.board[square].color === us){
-         let piece = getPieceType(position.board[square]);
+   let secondRank = us === colors.WHITE ? 1 : 7;
+   for( let i = squares.a8; i <= squares.h1; i++){
+      let square = coord1Dto2D(i);
+      if(position.board[i].color === us){
+         let piece = getPieceType(position.board[i]);
          if(piece === pieces.PAWN){
-            if(us === colors.WHITE){
-               if(getPieceType(position.board[square-8]) === pieces.NO_PIECE){
-                  moves.push({from:square, to:square-8, prom:null});
-               }
-            }else{
 
+            if(getPieceType(position.board[i-8]) === pieces.NO_PIECE){
+               moves.push({from:i, to:i-8, prom:null});
             }
+
          }else {
             PIECES_OFFSETS[piece].forEach((element) => {
-               let i = square;
-               white(i<squares.h1){
-                  i+=element;
-                  let p = position.board[i];
+               let j = square;
+               while(onBounds(j)){
+                  j.x+=element.x;
+                  j.y+=element.y
+
+                  let p = position.board[coord2Dto1D(j)];
                   if(p === pieces.NO_PIECE){
-                     moves.push({from:square, to:i, prom:null});
+                     moves.push({from:i, to:coord2Dto1D(j), prom:null});
                   }else if(getPieceColor(p) === them){
-                     moves.push({from:square, to:i, prom:null});
+                     moves.push({from:i, to:coord2Dto1D(j), prom:null});
                      break;
                   }else{
                      break;
@@ -409,7 +412,6 @@ const generateMoves = (position, options) =>{
                      break;
                   }
                }
-               
             });
          }  
       }
@@ -418,6 +420,7 @@ const generateMoves = (position, options) =>{
    return moves;
 }
 
+const onBounds = square => square.x>=0&&square.x<8&&square.y>=0&&square.y<8;
 
 const checkPath = (board, startX, startY, endX, endY)=>{    //returns the first piece on the path
    let stepX = Math.sign(endX-startX);
