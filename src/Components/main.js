@@ -2,7 +2,7 @@
 import {useState, useRef} from 'react';
 //eslint-disable-next-line
 import Style from './styles.css';
-import { startPosition, isMoveValid, performMove, squareNotationToIndex, getFENfromPosition, longToShortAlgebraicNotation} from '../Services/chess';
+import { startPosition, isMoveValid, performMove, squareNotationToIndex, generateMoves, getFENfromPosition, longToShortAlgebraicNotation} from '../Services/chess';
 import {Board} from './Board/Board';
 import {GameMovesDisplay}from './GameMovesDisplay/GameMovesDisplay';
 import {Node, insertNode} from  '../Services/moveTree';
@@ -81,6 +81,7 @@ export const Analysis = (props) =>{
       if(position.board[index]){
          setSelectedSquare(index);
       }
+      console.log(generateMoves(position));
    };
 
    const handleOnMouseUp = (e) =>{
