@@ -1,7 +1,7 @@
 import cloneDeep from 'lodash/cloneDeep'
 import parseInt from 'lodash/parseInt'
 
-enum SQUARES{
+enum Squares{
    a8= 0,
       b8,c8,d8,f8,g8,h8,
    a7,b7,c7,d7,f7,g7,h7,
@@ -14,7 +14,7 @@ enum SQUARES{
    NO_SQUARE
 }
 
-enum PIECE_TYPES{
+enum PieceTypes{
    NO_PIECE = '',
    PAWN     = 'p',
    KNIGTH   = 'n',
@@ -24,16 +24,15 @@ enum PIECE_TYPES{
    KING     = 'k'
 };
 
-enum COLORS{
+enum Colors{
    NO_COLOR = '',
    WHITE    = 'w',
    BLACK    = 'b'
 };
 
-
 type Position = {
    board:string[],            //array holding pieces positions
-   move:COLOR,                //whose move it is in the position
+   move:Colors,                //whose move it is in the position
    castlingPrivileges:string, //determinates how can white and black castle, representing white with uppercase and black with lowecase.
                               // ej: 'kqK' white can castle kingside and black to both sides
                               // ej: 'Qk white can castle queenside and black kingside
@@ -66,31 +65,31 @@ const coord1Dto2D = (index : number) : Square|null =>{
    return null;
 };
 
-export const getPieceType = (piece : string) : PIECE_TYPES =>{
+export const getPieceType = (piece : string) : PieceTypes =>{
    let type = piece.toLowerCase();
-   if(type === PIECE_TYPES.ROOK || type===PIECE_TYPES.KNIGTH || type === PIECE_TYPES.BISHOP || type===PIECE_TYPES.PAWN || type === PIECE_TYPES.KING || type===PIECE_TYPES.QUEEN){
+   if(type === PieceTypes.ROOK || type===PieceTypes.KNIGTH || type === PieceTypes.BISHOP || type===PieceTypes.PAWN || type === PieceTypes.KING || type===PieceTypes.QUEEN){
       return type; 
    }else{
-      return PIECE_TYPES.NO_PIECE;
+      return PieceTypes.NO_PIECE;
    }
 }
 
-const getPieceColor = (piece : string) : COLORS =>{
+const getPieceColor = (piece : string) : Colors =>{
    if(piece === ''){
-      return COLORS.NO_COLOR;
+      return Colors.NO_COLOR;
    }
-   return piece === piece.toLowerCase() ? COLORS.BLACK: COLORS.WHITE;
+   return piece === piece.toLowerCase() ? Colors.BLACK: Colors.WHITE;
 };
 
-const getPieceOfColor = (piece : string, color : COLORS) : string =>{   //return a piece of the color given ('r','w') -> 'R'
-   return color === COLORS.WHITE ? piece.toUpperCase() : piece.toLowerCase();
+const getPieceOfColor = (piece : string, color : Colors) : string =>{   //return a piece of the color given ('r','w') -> 'R'
+   return color === Colors.WHITE ? piece.toUpperCase() : piece.toLowerCase();
 };
 
-const getOpositeColor = (color : COLORS) : COLORS =>{
-   if(color !== COLORS.NO_COLOR){
-      return (color === COLORS.WHITE ? COLORS.BLACK : COLORS.WHITE);
+const getOpositeColor = (color : Colors) : Colors =>{
+   if(color !== Colors.NO_COLOR){
+      return (color === Colors.WHITE ? Colors.BLACK : Colors.WHITE);
    }
-   return COLORS.NO_COLOR;
+   return Colors.NO_COLOR;
 };
 
 export const startPosition : Position = {
@@ -103,7 +102,7 @@ export const startPosition : Position = {
        '','','','','','','','',
       'P','P','P','P','P','P','P','P', 
       'R','N','B','Q','K','B','N','R'],
-   move: COLORS.WHITE,                             
+   move: Colors.WHITE,                             
    castlingPrivileges:'kqKQ',                  
    enpassantSquare: null,                  
    fiftyMoveRuleCount:0,                    
@@ -111,31 +110,52 @@ export const startPosition : Position = {
 }; 
 
 type GenerateMovesOptions = {
-   legal: boolean,
-   square: SQUARES,
+   legal: boolean,      //if true generate only legal moves, else generate pseudo legal(not verify if in check)
+   square: Squares|null //if not null generate only for the square specified
 };
-export const generateMoves = (position) =>{
-   let moves = [];
-   let us = position.move;
-   let them = getOpositeColor(us);
-   let secondRank = us === colors.WHITE ? 6 : 1;
-   let firstRank = us === colors.WHITE ? 7 : 0;
-   for( let i = squares.a8; i <= squares.h1; i++){
+
+type Move = {
+   from: Squares,
+   to: Squares,
+   prom: PieceTypes     //in case of promotion indicates to witch type
+};
+
+const PIECES_OFFSETS = {
+   'p': {'w':-1,'b':1},
+   'n': [{x:1,y:2},{x:1,y:-2},{x:-1,y:2},{x:-1,y:-2},{x:2,y:1},{x:2,y:-1},{x:-2,y:1},{x:-2,y:-1},],
+   'b': [{x:1,y:1},{x:1,y:-1},{x:-1,y:1},{x:-1,y:-1}],
+   'r': [{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}],
+   'q': [{x:1,y:1},{x:1,y:-1},{x:-1,y:1},{x:-1,y:-1},{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}],
+   'k': [{x:1,y:1},{x:1,y:-1},{x:-1,y:1},{x:-1,y:-1},{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}]
+ };
+
+export const generateMoves = (position : Position, options : GenerateMovesOptions) : Move[] =>{
+   let moves : Move[] = [];
+   let us    : Colors = position.move;
+   let them  : Colors = getOpositeColor(us);
+
+   let secondRank = us === Colors.WHITE ? 6 : 1;
+   let firstRank  = us === Colors.WHITE ? 7 : 0;
+
+   let startSquare : Squares = options.square ? options.square : Squares.a8;
+   let endSquare : Squares = options.square ? options.square : Squares.h1;
+
+   for( let i = startSquare; i <= endSquare; i++){
       let square = coord1Dto2D(i);
       if(getPieceColor(position.board[i]) === us){
          let piece = getPieceType(position.board[i]);
-         if(piece === pieces.PAWN){
+         if(piece === PieceTypes.PAWN){
             let tmp = square;
             //forwards one square
-            tmp.y += PIECES_OFFSETS[pieces.PAWN][us];
-            if(getPieceType(position.board[coord2Dto1D(tmp)]) === pieces.NO_PIECE){
+            tmp.y += PIECES_OFFSETS[PieceTypes.PAWN][us];
+            if(getPieceType(position.board[coord2Dto1D(tmp)]) === PieceTypes.NO_PIECE){
                moves.push({from:i, to:coord2Dto1D(tmp), prom:null});
             }
             //attack left
             tmp.x -=1;
             if( onBounds(tmp) && 
-            (getPieceColor(position.board[coord2Dto1D(tmp)] === them ||
-             position.enpassantSquare === coord2Dto1D(tmp)))){
+            (getPieceColor(position.board[coord2Dto1D(tmp)]) === them ||
+             position.enpassantSquare === coord2Dto1D(tmp))){
                moves.push({from:i, to:coord2Dto1D(tmp), prom:null});
             }
             //atack right
@@ -144,59 +164,61 @@ export const generateMoves = (position) =>{
             console.log(onBounds(tmp));
             console.log(coord2Dto1D(tmp));
             if( onBounds(tmp) && 
-            (getPieceColor(position.board[coord2Dto1D(tmp)] === them ||
-             position.enpassantSquare === coord2Dto1D(tmp)))){
+            (getPieceColor(position.board[coord2Dto1D(tmp)]) === them ||
+             position.enpassantSquare === coord2Dto1D(tmp))){
                moves.push({from:i, to:coord2Dto1D(tmp), prom:null});
             }
             //long pawn move
             tmp.x-=1;
-            tmp.y+=PIECES_OFFSETS[pieces.PAWN][us];
-            if(square.y === secondRank && getPieceType(position.board[coord2Dto1D(tmp)]) === pieces.NO_PIECE){
+            tmp.y+=PIECES_OFFSETS[PieceTypes.PAWN][us];
+            if(square.y === secondRank && 
+               getPieceType(position.board[coord2Dto1D(tmp)]) === PieceTypes.NO_PIECE){
                moves.push({from:i, to:coord2Dto1D(tmp), prom:null});
             }
          }else {
-            PIECES_OFFSETS[piece].forEach((element) => {
-               let j = square;
-               while(onBounds(j)){
-                  j.x+=element.x;
-                  j.y+=element.y
-
-                  let p = position.board[coord2Dto1D(j)];
-                  if(p === pieces.NO_PIECE){
-                     moves.push({from:i, to:coord2Dto1D(j), prom:null});
+            for(let j = 0; j<PIECES_OFFSETS[piece].length; j++){
+               let tmp = square;
+               let offset = PIECES_OFFSETS[piece][j];
+               while(onBounds(tmp)){
+                  tmp.x+=offset.x;
+                  tmp.y+=offset.y
+                  let p = position.board[coord2Dto1D(tmp)];
+                  if(p === PieceTypes.NO_PIECE){
+                     moves.push({from:i, to:coord2Dto1D(tmp), prom:null});
                   }else if(getPieceColor(p) === them){
-                     moves.push({from:i, to:coord2Dto1D(j), prom:null});
+                     moves.push({from:i, to:coord2Dto1D(tmp), prom:null});
                      break;
                   }else{
                      break;
                   }
-                  if(piece === pieces.KNIGTH || piece === pieces.KING){
+                  if(piece === PieceTypes.KNIGTH || piece === PieceTypes.KING){
                      break;
                   }
                }
-            });
+            }
+
          }
          //kingside castling
-         if(piece === pieces.KING && position.castlingPrivileges.includes(us === colors.WHITE?'K':'k')){
+         if(piece === PieceTypes.KING && position.castlingPrivileges.includes(us === Colors.WHITE?'K':'k')){
             let e = {x:4, y:firstRank};
             let f = {x:5, y:firstRank};
             let g = {x:5, y:firstRank};
-            if(getPieceType(coord2Dto1D(f)===pieces.NO_PIECE)&&
-               getPieceType(coord2Dto1D(g)===pieces.NO_PIECE)&&
+            if(getPieceType(position.board[coord2Dto1D(f)])===PieceTypes.NO_PIECE&&
+               getPieceType(position.board[coord2Dto1D(g)])===PieceTypes.NO_PIECE&&
                !isAttackedBy(position.board,e,them)&&
                !isAttackedBy(position.board,g,them)){
                   moves.push({from:i, to:coord2Dto1D(g), prom:null});
                }
          }
          //queenside castling
-         if(piece === pieces.KING && position.castlingPrivileges.includes(us === colors.WHITE?'Q':'q')){
+         if(piece === PieceTypes.KING && position.castlingPrivileges.includes(us === Colors.WHITE?'Q':'q')){
             let e = {x:4, y:firstRank};
             let d = {x:3, y:firstRank};
             let c = {x:2, y:firstRank};
             let b = {x:1, y:firstRank};
-            if(getPieceType(coord2Dto1D(d)===pieces.NO_PIECE)&&
-               getPieceType(coord2Dto1D(c)===pieces.NO_PIECE)&&
-               getPieceType(coord2Dto1D(b)===pieces.NO_PIECE)&&
+            if(getPieceType(position.board[coord2Dto1D(d)])===PieceTypes.NO_PIECE&&
+               getPieceType(position.board[coord2Dto1D(c)])===PieceTypes.NO_PIECE&&
+               getPieceType(position.board[coord2Dto1D(b)])===PieceTypes.NO_PIECE&&
                !isAttackedBy(position.board,e,them)&&
                !isAttackedBy(position.board,d,them)){
                   moves.push({from:i, to:coord2Dto1D(c), prom:null});
@@ -204,14 +226,17 @@ export const generateMoves = (position) =>{
          }
       }
    }
-   let legalMoves = [];
-   moves.forEach((element)=>{
-      let newPosition = cloneDeep(position);
-      performMove(newPosition, element.from, element.to);
-      if(!isOnCheck(newPosition.board, newPosition.move)){
-         legalMoves.push(element);
-      }
-   });
+   if(options.legal){
+      let legalMoves : Move[] = [];
+      moves.forEach((element)=>{
+         let newPosition = cloneDeep(position);
+         performMove(newPosition, element.from, element.to);
+         if(!isOnCheck(newPosition.board, newPosition.move)){
+            legalMoves.push(element);
+         }
+      });
+      return legalMoves;
+   }
    return moves;
 }
 
@@ -531,64 +556,90 @@ export const longToShortAlgebraicNotation = (position, notation) =>{
    return getMoveNotation(position, start, end);
 }
 
-const PIECES_OFFSETS = {
-  'p': {'w':-1,'b':1},
-  'n': [{x:1,y:2},{x:1,y:-2},{x:-1,y:2},{x:-1,y:-2},{x:2,y:1},{x:2,y:-1},{x:-2,y:1},{x:-2,y:-1},],
-  'b': [{x:1,y:1},{x:1,y:-1},{x:-1,y:1},{x:-1,y:-1}],
-  'r': [{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}],
-  'q': [{x:1,y:1},{x:1,y:-1},{x:-1,y:1},{x:-1,y:-1},{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}],
-  'k': [{x:1,y:1},{x:1,y:-1},{x:-1,y:1},{x:-1,y:-1},{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}]
-};
 
+const checkPath = (board  : string[],
+                   start  : Square,
+                   offset : {x: number, y: number}) : {pieceHit: string, distance:number} =>{  
 
+   let i        : number = 0;
+   let tmp      : Square = start;
+   let piece    : string;
 
-
-const checkPath = (board, startX, startY, endX, endY)=>{    //returns the first piece on the path
-   let stepX = Math.sign(endX-startX);
-   let stepY = Math.sign(endY-startY);
-   for(let i= 1; i<Math.max(Math.abs(endX-startX), Math.abs(endY-startY));i++){     
-      let squareInPath = coord2Dto1D(startX+i*stepX, startY+i*stepY);
-      let pieceAtSquare = board[squareInPath];
-      if(pieceAtSquare !== pieces.NO_PIECE){
-         return pieceAtSquare;
+   while(onBounds(tmp)){
+      i++;
+      tmp.x+= offset.x;
+      tmp.y+= offset.y;
+      piece = board[coord2Dto1D(tmp)];
+      if(piece !== PieceTypes.NO_PIECE){
+         return {pieceHit:piece, distance:i};
       }
    }
-   return pieces.NO_PIECE;
+
+   return {pieceHit: PieceTypes.NO_PIECE, distance:0};
 };
 
-const isAttackedBy = (board, square, color)=>{ //return true if color is attacking square.
-   let squarePos = coord1Dto2D(square)
-   let x = squarePos.x;
-   let y = squarePos.y;
-   let queen = getPieceOfColor(pieces.QUEEN,color);
-   let rook = getPieceOfColor(pieces.ROOK, color);
-   let knight = getPieceOfColor(pieces.KNIGTH, color);
-   let bishop = getPieceOfColor(pieces.BISHOP, color);
-   let pawn = getPieceOfColor(pieces.PAWN, color);
-   let king = getPieceOfColor(pieces.KING, color);
-
-   //horizontal direction
-   let pieceHit;
-   pieceHit = checkPath(board, x,y,8,y);
-   if(pieceHit === queen || pieceHit === rook || pieceHit === king){
+//return true if color is attacking square
+const isAttackedBy = (position : Position, square : Squares, color : Colors) : boolean =>{ 
+   if(square === position.enpassantSquare){
       return true;
    }
-   pieceHit = checkPath(board, x,y,0,y);//should be -1????????
-   if(pieceHit === queen || pieceHit === rook || pieceHit === king){
+   
+   let pos = coord1Dto2D(square)
+
+   let queen = getPieceOfColor(PieceTypes.QUEEN,color);
+   let rook = getPieceOfColor(PieceTypes.ROOK, color);
+   let knight = getPieceOfColor(PieceTypes.KNIGTH, color);
+   let bishop = getPieceOfColor(PieceTypes.BISHOP, color);
+   let pawn = getPieceOfColor(PieceTypes.PAWN, color);
+   let king = getPieceOfColor(PieceTypes.KING, color);
+
+   let offset : {x:number, y:number};
+   let result : {pieceHit : string, distance : number};
+   let board = position.board;
+   //horizontal direction
+   offset.x = 1;
+   offset.y = 0;
+   result = checkPath(board, pos, offset);
+   if(result.pieceHit === queen || result.pieceHit === rook || (result.pieceHit === king && result.distance === 1)){
+      return true;
+   }
+
+   offset.x = -1;
+   offset.y = 0;
+   result = checkPath(board, pos, offset);
+   if(result.pieceHit === queen || result.pieceHit === rook || (result.pieceHit === king && result.distance === 1)){
       return true;
    }
 
    //vertical direction
-   pieceHit = checkPath(board, x,y,x,8);
-   if(pieceHit === queen || pieceHit === rook || pieceHit === king){
+   offset.x = 0;
+   offset.y = 1;
+   result = checkPath(board, pos, offset);
+   if(result.pieceHit === queen || result.pieceHit === rook || (result.pieceHit === king && result.distance === 1)){
       return true;
    }
-   pieceHit = checkPath(board, x,y,x,0);//should be -1????????
-   if(pieceHit === queen || pieceHit === rook || pieceHit === king){
+
+   offset.x = 0;
+   offset.y = -1;
+   result = checkPath(board, pos, offset);
+   if(result.pieceHit === queen || result.pieceHit === rook || (result.pieceHit === king && result.distance === 1)){
       return true;
    }
 
    //diagonals
+   offset.x = 1;
+   offset.y = 1;
+   result = checkPath(board, pos, offset);
+   if(result.pieceHit === queen || result.pieceHit === bishop || (result.pieceHit === king && result.distance === 1)){
+      return true;
+   }
+
+   offset.x = -1;
+   offset.y = 0;
+   result = checkPath(board, pos, offset);
+   if(result.pieceHit === queen || result.pieceHit === bishop || (result.pieceHit === king && result.distance === 1)){
+      return true;
+   }
    pieceHit = checkPath(board, x,y,x+8,y+8);
    if(pieceHit === queen || pieceHit === bishop){
       return true;
@@ -630,10 +681,6 @@ const isOnCheck = (board, color)=>{
    let kingSquare = board.findIndex((element)=>element === king);
    return isAttackedBy(board, kingSquare, getOpositeColor(color));
 };
-
-
-
-
 
 export const getPositionFromFEN = (fen) =>{
    let position = {};
