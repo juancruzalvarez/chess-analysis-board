@@ -1,0 +1,17 @@
+{
+   "compileOnSave": true,
+   "compilerOptions": {
+   "moduleResolution": "node",
+   "jsx": "react-jsx",
+     "module": "ESNext",
+     "importHelpers": true,
+     "target": "ESNext",
+     "typeRoots": [
+       "node_modules/@types"
+     ],
+     "lib": [
+       "ESNext",
+       "dom",
+     ]
+   }
+ }

@@ -1,9 +1,14 @@
+import { useState } from 'react';
 import { pieceImages } from '../../Assets/ImagesIndex';
 import { moveType } from '../../Services/chess';
 
 export function Board(props){
+   const [mousePosition, setMousePosition] = useState({x:0,y:0});
+   const handleOnMouseMove = (e)=>{
+      setMousePosition({x:e.clientX, y:e.clientY});
+   };
    return (
-      <div ref = {props.boardReference} className='chessboard' onMouseDown = {props.onMouseDown} onMouseUp = {props.onMouseUp} onMouseMove = {props.onMouseMove}>
+      <div ref = {props.boardReference} className='chessboard' onMouseDown = {props.onMouseDown} onMouseUp = {props.onMouseUp} onMouseMove = {handleOnMouseMove}>
          {
             props.board.map((element, index) =>{
                let row = Math.floor(index/8);
@@ -14,7 +19,7 @@ export function Board(props){
                               piece   = {element}
                               pieceSize = {props.pieceSize}
                               grabbed = {props.grabbedPiece === index}
-                              mousePosition = {props.mousePosition}
+                              mousePosition = {mousePosition}
                         />
             })
          }

@@ -1,13 +1,13 @@
 
-import {useState, useRef} from 'react';
+import {useState, useRef, DOMElement} from 'react';
 //eslint-disable-next-line
-import Style from './styles.css';
-import { startPosition, isMoveValid, performMove, squareNotationToIndex, generateMoves, getFENfromPosition, longToShortAlgebraicNotation} from '../Services/chess';
+import { startPosition, isMoveValid, makeMove, getMoveNotation, squareNotationToIndex,getFENfromPosition, longToShortAlgebraicNotation} from '../Services/chess';
 import {Board} from './Board/Board';
 import {GameMovesDisplay}from './GameMovesDisplay/GameMovesDisplay';
 import {Node, insertNode} from  '../Services/moveTree';
 import { EngineEvaluation } from './EngineEvaluation/EngineEvaluation';
 import {cloneDeep} from 'lodash';
+const Style = require('./styles.css');
 
 export const Analysis = (props) =>{
    
@@ -15,12 +15,11 @@ export const Analysis = (props) =>{
    const [position, setPosition] = useState(startPosition);
    const [moveTree, setMoveTree] = useState(new Node(0, '', startPosition));
    const [selectedSquare, setSelectedSquare] = useState(null);
-   const [mousePosition, setMousePosition] = useState({x:0,y:0});
    const [currentNodeID, setCurrentNodeID] = useState(0);
    const [newNodeID, setNewNodeID] = useState(1);
    const [engineOn, setEngineOn] = useState(false);
    const [engineLines, setEngineLines] = useState([{score:'',line:''}, {score:'',line:''}, {score:'',line:''}]);
-   const boardRef = useRef();
+   const boardRef = useRef<HTMLElement>();
    const stockfishRef = useRef(null);
  
    const getBoardSquare = (clientX, clientY) =>{
@@ -56,7 +55,7 @@ export const Analysis = (props) =>{
             line = data.splice(data.findIndex((element) => element === 'pv')+1).map(
                (element) =>{
                   let m = longToShortAlgebraicNotation(tmp, element);
-                  performMove(tmp,squareNotationToIndex(element.substring(0,2)),squareNotationToIndex(element.substring(2,4)));
+                  tmp = makeMove(tmp,{from:squareNotationToIndex(element.substring(0,2)),to:squareNotationToIndex(element.substring(2,4)), prom:null});
                   return m;
                }).join(' ');
             let lineNumber = data[data.findIndex((element) => element === 'multipv')+1] -1;
@@ -77,32 +76,29 @@ export const Analysis = (props) =>{
    };
    
    const handleOnMouseDown = (e) =>{
+      console.log('MouseDown');
       let index = getBoardSquare(e.clientX, e.clientY);
       if(position.board[index]){
          setSelectedSquare(index);
       }
-      console.log(generateMoves(position));
    };
 
    const handleOnMouseUp = (e) =>{
+      console.log('MouseUp');
       let index = getBoardSquare(e.clientX, e.clientY);
-      if(isMoveValid(position,selectedSquare, index)){
-         let newPosition = cloneDeep(position);
-         let move = performMove(newPosition, selectedSquare, index);
-         setPosition(newPosition);
-         let newNode = new Node(newNodeID, move, newPosition);
+      let move = {from:selectedSquare, to:index, prom:null};
+      if(isMoveValid(position, move)){
+         let newPosition = makeMove(position, {from: selectedSquare, to:index, prom:null});
+         let newNode = new Node(newNodeID, getMoveNotation(position, move), newPosition);
          let newMoveTree = cloneDeep(moveTree);
          insertNode(newMoveTree, currentNodeID, newNode);
+         setPosition(newPosition);
          setMoveTree(newMoveTree);
          setCurrentNodeID(newNodeID);
          setNewNodeID(newNodeID + 1);
          restartEvaluation(newPosition);
       }
       setSelectedSquare(null);
-   };
-
-   const handleOnMouseMove = (e)=>{
-      setMousePosition({x:e.clientX, y:e.clientY});
    };
 
    const handleOnClickNode = (clickedNodeId, clickedNodePosition) =>{
@@ -139,9 +135,7 @@ export const Analysis = (props) =>{
          board = {position.board}
          pieceSize = { boardRef.current && boardRef.current.getBoundingClientRect().width/8}
          grabbedPiece = {selectedSquare}
-         mousePosition = {mousePosition}
          onMouseDown =  {handleOnMouseDown}
-         onMouseMove = {handleOnMouseMove}
          onMouseUp = {handleOnMouseUp}
       /> 
 
