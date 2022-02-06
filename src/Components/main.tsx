@@ -1,7 +1,7 @@
 
 import {useState, useRef, DOMElement} from 'react';
 //eslint-disable-next-line
-import { startPosition, isMoveValid, makeMove, getMoveNotation, squareNotationToIndex,getFENfromPosition, longToShortAlgebraicNotation} from '../Services/chess';
+import {PieceTypes, getPieceType, startPosition, isMoveValid, makeMove, getMoveNotation, squareNotationToIndex,getFENfromPosition, longToShortAlgebraicNotation} from '../Services/chess';
 import {Board} from './Board/Board';
 import {GameMovesDisplay}from './GameMovesDisplay/GameMovesDisplay';
 import {Node, insertNode} from  '../Services/moveTree';
@@ -87,8 +87,27 @@ export const Analysis = (props) =>{
       console.log('MouseUp');
       let index = getBoardSquare(e.clientX, e.clientY);
       let move = {from:selectedSquare, to:index, prom:null};
+      let rank = Math.floor(index/8);
+      if(getPieceType(position.board[selectedSquare]) === PieceTypes.PAWN &&(rank===0 ||rank===7)){
+         //promotion
+         //crate promotion selection contex menu and make it add the move itself
+         console.log('PROMOTION');
+         console.log('PROMOTION');
+         console.log('PROMOTION');
+         console.log('PROMOTION');
+         console.log('PROMOTION');
+         console.log('PROMOTION');
+         console.log('PROMOTION');
+      }else{
+         addMove(move);
+      }
+      
+      setSelectedSquare(null);
+   };
+
+   const addMove = (move) =>{
       if(isMoveValid(position, move)){
-         let newPosition = makeMove(position, {from: selectedSquare, to:index, prom:null});
+         let newPosition = makeMove(position, move);
          let newNode = new Node(newNodeID, getMoveNotation(position, move), newPosition);
          let newMoveTree = cloneDeep(moveTree);
          insertNode(newMoveTree, currentNodeID, newNode);
@@ -98,9 +117,7 @@ export const Analysis = (props) =>{
          setNewNodeID(newNodeID + 1);
          restartEvaluation(newPosition);
       }
-      setSelectedSquare(null);
-   };
-
+   }
    const handleOnClickNode = (clickedNodeId, clickedNodePosition) =>{
       setCurrentNodeID(clickedNodeId);
       setPosition(clickedNodePosition);

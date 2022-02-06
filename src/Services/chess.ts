@@ -3,18 +3,18 @@ import parseInt from 'lodash/parseInt'
 
 enum Squares{
    a8= 0,
-      b8,c8,d8,f8,g8,h8,
-   a7,b7,c7,d7,f7,g7,h7,
-   a6,b6,c6,d6,f6,g6,h6,
-   a5,b5,c5,d5,f5,g5,h5,
-   a4,b4,c4,d4,f4,g4,h4,
-   a3,b3,c3,d3,f3,g3,h3,
-   a2,b2,c2,d2,f2,g2,h2,
-   a1,b1,c1,d1,f1,g1,h1,
+      b8,c8,d8,e8,f8,g8,h8,
+   a7,b7,c7,d7,e7,f7,g7,h7,
+   a6,b6,c6,d6,e6,f6,g6,h6,
+   a5,b5,c5,d5,e5,f5,g5,h5,
+   a4,b4,c4,d4,e4,f4,g4,h4,
+   a3,b3,c3,d3,e3,f3,g3,h3,
+   a2,b2,c2,d2,e2,f2,g2,h2,
+   a1,b1,c1,d1,e1,f1,g1,h1,
    NO_SQUARE
 }
 
-enum PieceTypes{
+export enum PieceTypes{
    NO_PIECE = '',
    PAWN     = 'p',
    KNIGTH   = 'n',
@@ -68,7 +68,7 @@ const coord1Dto2D = (index: number): Square|null =>{
    return null;
 };
 
-const getPieceType = (piece: string): PieceTypes =>{
+export const getPieceType = (piece: string): PieceTypes =>{
    if(piece){
       let type = piece.toLowerCase();
       if(type === PieceTypes.ROOK || type===PieceTypes.KNIGTH || type === PieceTypes.BISHOP || type===PieceTypes.PAWN || type === PieceTypes.KING || type===PieceTypes.QUEEN){
@@ -81,7 +81,7 @@ const getPieceType = (piece: string): PieceTypes =>{
    }
 }
 
-const getPieceColor = (piece: string): Colors =>{
+export const getPieceColor = (piece: string): Colors =>{
    if(!piece){
       return Colors.NO_COLOR;
    }
@@ -137,8 +137,7 @@ const PIECES_OFFSETS = {
  };
 
 const generateMoves = (position: Position, options: GenerateMovesOptions): Move[] =>{
-   console.log('Generating Moves:');
-   console.time('GenerateMoves');
+
    let moves: Move[] = [];
    let us: Colors    = position.move;
    let them: Colors  = getOpositeColor(us);
@@ -241,11 +240,11 @@ const generateMoves = (position: Position, options: GenerateMovesOptions): Move[
             legalMoves.push(element);
          }
       });
-      console.timeEnd('GenerateMoves');
+
       return legalMoves;
       
    }
-   console.timeEnd('GenerateMoves');
+
    return moves;  
 }
 
@@ -428,11 +427,11 @@ export const makeMove = (position: Position, move: Move): Position =>{
       }
       case PieceTypes.KING: {
          if(start.pieceColor === Colors.WHITE){
-            newPosition.castlingPrivileges.replace('K','');
-            newPosition.castlingPrivileges.replace('Q','');
+            newPosition.castlingPrivileges = newPosition.castlingPrivileges.replace('K','');
+            newPosition.castlingPrivileges = newPosition.castlingPrivileges.replace('Q','');
          }else{
-            newPosition.castlingPrivileges.replace('k','');
-            newPosition.castlingPrivileges.replace('q','');
+            newPosition.castlingPrivileges = newPosition.castlingPrivileges.replace('k','');
+            newPosition.castlingPrivileges = newPosition.castlingPrivileges.replace('q','');
          }
          if(Math.abs(start.square.x-end.square.x) >1){   //castle
             let rank = start.pieceColor === Colors.WHITE ? 7 : 0;
@@ -456,15 +455,15 @@ export const makeMove = (position: Position, move: Move): Position =>{
       case PieceTypes.ROOK: {
          if(start.pieceColor === Colors.WHITE){
             if(move.from === Squares.a1){
-               newPosition.castlingPrivileges.replace('Q','');
+               newPosition.castlingPrivileges = newPosition.castlingPrivileges.replace('Q','');
             }else if(move.from === Squares.h1){
-               newPosition.castlingPrivileges.replace('K','');
+               newPosition.castlingPrivileges = newPosition.castlingPrivileges.replace('K','');
             }
          }else{
             if(move.from === Squares.a8){
-               newPosition.castlingPrivileges.replace('q','');
+               newPosition.castlingPrivileges = newPosition.castlingPrivileges.replace('q','');
             }else if(move.from === Squares.h8){
-               newPosition.castlingPrivileges.replace('k','');
+               newPosition.castlingPrivileges = newPosition.castlingPrivileges.replace('k','');
             }
          }
          newPosition.board[move.to] = start.piece;
@@ -486,26 +485,39 @@ export const getMoveNotation = (position: Position, move: Move): string =>{
    let movedPieceType = getPieceType(position.board[move.from]);
    let startSquare = coord1Dto2D(move.from);
    let endSquare = coord1Dto2D(move.to);
+   let moveNotation: string;
+  
    if(movedPieceType === PieceTypes.KING && (Math.abs(startSquare.x-endSquare.x) >1 || Math.abs(endSquare.y-startSquare.y) > 1)){
       if(move.to > move.from){
-         return 'O-O'
+         moveNotation= 'O-O'
       }else{
-         return 'O-O-O'
+         moveNotation= 'O-O-O'
       }
    }else if (movedPieceType === PieceTypes.PAWN){
       if(position.board[move.to] !== PieceTypes.NO_PIECE || move.to === position.enpassantSquare){
-         return indexToSquareNotation(move.from)[0] + 'x' + indexToSquareNotation(move.to);
+         moveNotation= indexToSquareNotation(move.from)[0] + 'x' + indexToSquareNotation(move.to);
       }else{
-         return indexToSquareNotation(move.to);
+         moveNotation= indexToSquareNotation(move.to);
       }
    }else{
-      return movedPieceType.toUpperCase() + (position.board[move.to] !== PieceTypes.NO_PIECE ? 'x' : '') + indexToSquareNotation(move.to);
+      moveNotation = movedPieceType.toUpperCase() + (position.board[move.to] !== PieceTypes.NO_PIECE ? 'x' : '') + indexToSquareNotation(move.to);
    }
+   
+   let newPosition: Position = makeMove(position, move);
+   let termination: GameTerminations = gameTermination(newPosition);
+  
+   if(termination === GameTerminations.CHECKMATE){
+      moveNotation+='#';
+   }else if(isOnCheck(newPosition, newPosition.move)){
+      moveNotation+='+';
+   }
+   return moveNotation;
+   
 
 }
 
 export const longToShortAlgebraicNotation = (position: Position, notation: string) =>{
-   console.log('LONG TO SHORT');
+
    let startSquare = squareNotationToIndex(notation.substring(0,2));
    let endSquare = squareNotationToIndex(notation.substring(2,4));
    let move: Move = {from:startSquare, to: endSquare, prom: null};
@@ -583,8 +595,6 @@ const indexToSquareNotation = (index: Squares): string =>{
    let square: Square = coord1Dto2D(index);
    return String.fromCharCode(square.x+97).concat((8-square.y).toString());
 }
-
-
 
 const gameTermination = (position: Position): GameTerminations =>{
    if(generateMoves(position, {square:null, legal:true}).length === 0){
