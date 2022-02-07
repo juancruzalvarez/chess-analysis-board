@@ -3,6 +3,7 @@ import {useState, useRef, DOMElement} from 'react';
 //eslint-disable-next-line
 import {PieceTypes, getPieceType, startPosition, isMoveValid, makeMove, getMoveNotation, squareNotationToIndex,getFENfromPosition, longToShortAlgebraicNotation} from '../Services/chess';
 import {Board} from './Board/Board';
+import { PromotionSelection } from './PromotionSelection/PromotionSelection';
 import {GameMovesDisplay}from './GameMovesDisplay/GameMovesDisplay';
 import {Node, insertNode} from  '../Services/moveTree';
 import { EngineEvaluation } from './EngineEvaluation/EngineEvaluation';
@@ -19,6 +20,8 @@ export const Analysis = (props) =>{
    const [newNodeID, setNewNodeID] = useState(1);
    const [engineOn, setEngineOn] = useState(false);
    const [engineLines, setEngineLines] = useState([{score:'',line:''}, {score:'',line:''}, {score:'',line:''}]);
+   const [promMove, setPromMove] = useState(null);
+   const [showPromMenu, setShowPromMenu] = useState(false);
    const boardRef = useRef<HTMLElement>();
    const stockfishRef = useRef(null);
  
@@ -91,13 +94,8 @@ export const Analysis = (props) =>{
       if(getPieceType(position.board[selectedSquare]) === PieceTypes.PAWN &&(rank===0 ||rank===7)){
          //promotion
          //crate promotion selection contex menu and make it add the move itself
-         console.log('PROMOTION');
-         console.log('PROMOTION');
-         console.log('PROMOTION');
-         console.log('PROMOTION');
-         console.log('PROMOTION');
-         console.log('PROMOTION');
-         console.log('PROMOTION');
+         setShowPromMenu(true);
+         setPromMove(move);
       }else{
          addMove(move);
       }
@@ -117,11 +115,18 @@ export const Analysis = (props) =>{
          setNewNodeID(newNodeID + 1);
          restartEvaluation(newPosition);
       }
-   }
+   };
+
    const handleOnClickNode = (clickedNodeId, clickedNodePosition) =>{
       setCurrentNodeID(clickedNodeId);
       setPosition(clickedNodePosition);
       restartEvaluation(clickedNodePosition);
+   };
+
+   const handleOnClickPromotion = (piece) =>{
+      addMove({...promMove, prom:piece});
+      setShowPromMenu(false);
+      setPromMove(null);
    };
 
    const handleEnginetoggle = ()=>{
@@ -141,10 +146,11 @@ export const Analysis = (props) =>{
       console.log('LAST STATE:'+engineOn);
       console.log('NEW STATE:'+!engineOn);
       console.log('stockfishTreadh:'+stockfishRef.current);
-   }
+   };
 
    return (
    <div className ='mainContainer'>
+      {showPromMenu && <PromotionSelection />}
       <div className = 'anotationContainer'></div>
 
       <Board 

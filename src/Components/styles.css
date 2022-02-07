@@ -231,3 +231,21 @@ color: rgb(95, 93, 93);
 .engineLine strong{
    margin-right: 1em;
 }
+
+.promotionSelectionContainer{
+   position: absolute;
+  left: 50%;
+  transform: translate(-50%, 0);
+  height:50px;
+  width:200px;
+  background-color: #4d4d4d;
+}
+
+.promotionSelectionImage{
+   display:inline-block;
+   width:25%;
+   height: 100%;
+}
+.promotionSelectionImage:hover{
+   background-color:#ccc;
+}
