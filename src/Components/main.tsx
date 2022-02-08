@@ -1,13 +1,14 @@
 
 import {useState, useRef, DOMElement} from 'react';
 //eslint-disable-next-line
-import {PieceTypes, getPieceType, startPosition, isMoveValid, makeMove, getMoveNotation, squareNotationToIndex,getFENfromPosition, longToShortAlgebraicNotation} from '../Services/chess';
+import {PieceTypes, Colors, getPieceType, startPosition, isMoveValid, makeMove, getMoveNotation, squareNotationToIndex,getFENfromPosition, longToShortAlgebraicNotation} from '../Services/chess';
 import {Board} from './Board/Board';
 import { PromotionSelection } from './PromotionSelection/PromotionSelection';
 import {GameMovesDisplay}from './GameMovesDisplay/GameMovesDisplay';
 import {Node, insertNode} from  '../Services/moveTree';
 import { EngineEvaluation } from './EngineEvaluation/EngineEvaluation';
 import {cloneDeep} from 'lodash';
+import { collapseTextChangeRangesAcrossMultipleVersions } from 'typescript';
 const Style = require('./styles.css');
 
 export const Analysis = (props) =>{
@@ -124,6 +125,7 @@ export const Analysis = (props) =>{
    };
 
    const handleOnClickPromotion = (piece) =>{
+      console.log(piece);
       addMove({...promMove, prom:piece});
       setShowPromMenu(false);
       setPromMove(null);
@@ -150,7 +152,7 @@ export const Analysis = (props) =>{
 
    return (
    <div className ='mainContainer'>
-      {showPromMenu && <PromotionSelection />}
+      {showPromMenu && <PromotionSelection onClickHandler = {handleOnClickPromotion} color = {promMove.to === 0 ? Colors.BLACK : Colors.WHITE}/>}
       <div className = 'anotationContainer'></div>
 
       <Board 

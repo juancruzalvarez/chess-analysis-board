@@ -1,22 +1,22 @@
 import { pieceImages } from '../../Assets/ImagesIndex';
-
+import { PieceTypes, getPieceOfColor } from '../../Services/chess';
 export const PromotionSelection = (props) =>{
    
    return (
       <div className = 'promotionSelectionContainer'>
-         <PromotionSelectionButton piece = 'N' onClickHandler = {props.onClickHandler}/>
-         <PromotionSelectionButton piece = 'B'/>
-         <PromotionSelectionButton piece = 'R'/>
-         <PromotionSelectionButton piece = 'Q'/>
+         <PromotionSelectionButton piece = {PieceTypes.KNIGTH} onClickHandler = {props.onClickHandler}/>
+         <PromotionSelectionButton piece = {PieceTypes.BISHOP} onClickHandler = {props.onClickHandler}/>
+         <PromotionSelectionButton piece = {PieceTypes.ROOK} onClickHandler = {props.onClickHandler}/>
+         <PromotionSelectionButton piece = {PieceTypes.QUEEN} onClickHandler = {props.onClickHandler}/>
       </div>
    );
 }
 export const PromotionSelectionButton = (props)=>{
    let style = {
-      backgroundImage: `url(${pieceImages[props.piece]})`,
+      backgroundImage: `url(${pieceImages[getPieceOfColor(props.piece, props.color)]})`,
       backgroundSize: '80%',
       backgroundPosition:'center',
       backgroundRepeat: 'no-repeat',
    }
-   return <div className = 'promotionSelectionImage' style={style} onClick ={props.onClickHandler}></div>
+   return <div className = 'promotionSelectionImage' style={style} onClick ={()=>props.onClickHandler(props.piece)}></div>
 }

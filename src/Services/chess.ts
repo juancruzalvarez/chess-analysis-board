@@ -24,7 +24,7 @@ export enum PieceTypes{
    KING     = 'k'
 };
 
-enum Colors{
+export enum Colors{
    NO_COLOR = '',
    WHITE    = 'w',
    BLACK    = 'b'
@@ -88,7 +88,7 @@ export const getPieceColor = (piece: string): Colors =>{
    return piece === piece.toLowerCase() ? Colors.BLACK: Colors.WHITE;
 };
 
-const getPieceOfColor = (piece: string, color: Colors): string =>{   //return a piece of the color given ('r','w') -> 'R'
+export const getPieceOfColor = (piece: string, color: Colors): string =>{   //return a piece of the color given ('r','w') -> 'R'
    return color === Colors.WHITE ? piece.toUpperCase() : piece.toLowerCase();
 };
 
@@ -148,6 +148,17 @@ const generateMoves = (position: Position, options: GenerateMovesOptions): Move[
    let startSquare : Squares = options.square ? options.square : Squares.a8;
    let endSquare : Squares = options.square ? options.square : Squares.h1;
 
+   const addPawnMove = (from: Squares, to: Squares) =>{
+      let square = coord1Dto2D(to);
+      if(square.y === 0 || square.y ===7){
+         moves.push({from:from, to:to, prom:PieceTypes.KNIGTH});
+         moves.push({from:from, to:to, prom:PieceTypes.BISHOP});
+         moves.push({from:from, to:to, prom:PieceTypes.ROOK});
+         moves.push({from:from, to:to, prom:PieceTypes.QUEEN});
+      }else{
+         moves.push({from:from, to:to, prom:null});
+      }
+   }
    for( let i = startSquare; i <= endSquare; i++){
       let square = coord1Dto2D(i);
       if(getPieceColor(position.board[i]) === us){
@@ -157,30 +168,33 @@ const generateMoves = (position: Position, options: GenerateMovesOptions): Move[
             //forwards one square
             tmp.y += PIECES_OFFSETS[PieceTypes.PAWN][us];
             if(getPieceType(position.board[coord2Dto1D(tmp)]) === PieceTypes.NO_PIECE){
-               moves.push({from:i, to:coord2Dto1D(tmp), prom:null});
+               addPawnMove(i, coord2Dto1D(tmp));
+               //long pawn move
+               tmp.y+=PIECES_OFFSETS[PieceTypes.PAWN][us];
+
+               if(square.y === secondRank && 
+                  getPieceType(position.board[coord2Dto1D(tmp)]) === PieceTypes.NO_PIECE){
+                  addPawnMove(i, coord2Dto1D(tmp));
+               }
+               
+
+               tmp.y-=PIECES_OFFSETS[PieceTypes.PAWN][us];
             }
             //attack left
             tmp.x -=1;
             if( onBounds(tmp) && 
             (getPieceColor(position.board[coord2Dto1D(tmp)]) === them ||
              position.enpassantSquare === coord2Dto1D(tmp))){
-               moves.push({from:i, to:coord2Dto1D(tmp), prom:null});
+               addPawnMove(i, coord2Dto1D(tmp));
             }
             //atack right
             tmp.x+=2;
             if( onBounds(tmp) && 
             (getPieceColor(position.board[coord2Dto1D(tmp)]) === them ||
              position.enpassantSquare === coord2Dto1D(tmp))){
-               moves.push({from:i, to:coord2Dto1D(tmp), prom:null});
+               addPawnMove(i, coord2Dto1D(tmp));
             }
-            //long pawn move
-            tmp.x-=1;
-            tmp.y+=PIECES_OFFSETS[PieceTypes.PAWN][us];
-
-            if(square.y === secondRank && 
-               getPieceType(position.board[coord2Dto1D(tmp)]) === PieceTypes.NO_PIECE){
-               moves.push({from:i, to:coord2Dto1D(tmp), prom:null});
-            }
+            
          }else {
             for(let j = 0; j<PIECES_OFFSETS[piece].length; j++){
                let tmp = {...square};
@@ -416,7 +430,8 @@ export const makeMove = (position: Position, move: Move): Position =>{
          }else{
             newPosition.enpassantSquare = null;
          }
-         newPosition.board[move.to] = start.piece;
+         
+         newPosition.board[move.to] = move.prom ? getPieceOfColor(move.prom, end.square.y === 0 ? Colors.WHITE : Colors.BLACK ):start.piece;
          newPosition.board[move.from] = PieceTypes.NO_PIECE;
          if(start.square.x !== end.square.x && end.piece === PieceTypes.NO_PIECE){  //enpassant
             let tmp = end.square;
