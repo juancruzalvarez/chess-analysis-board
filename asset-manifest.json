@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/chess-analysis-board/static/css/main.aa9814fa.css",
+    "main.js": "/chess-analysis-board/static/js/main.bf0cafd2.js",
+    "static/js/787.6fc6b4e8.chunk.js": "/chess-analysis-board/static/js/787.6fc6b4e8.chunk.js",
+    "index.html": "/chess-analysis-board/index.html",
+    "main.aa9814fa.css.map": "/chess-analysis-board/static/css/main.aa9814fa.css.map",
+    "main.bf0cafd2.js.map": "/chess-analysis-board/static/js/main.bf0cafd2.js.map",
+    "787.6fc6b4e8.chunk.js.map": "/chess-analysis-board/static/js/787.6fc6b4e8.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.aa9814fa.css",
+    "static/js/main.bf0cafd2.js"
+  ]
+}
