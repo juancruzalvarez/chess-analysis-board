@@ -36,3 +36,17 @@ export const  insertNode = (node, parentId, newNode) => {
        }
    }
 }
+
+export const getParent = (node, nodeId) =>{
+    for (let i = 0; i < node.getChildren().length; i++) {
+        if(node.getChildren()[i].id === nodeId){
+            return node;
+        } 
+    }
+    let result = null;
+    for (let i = 0; (i < node.getChildren().length) && result === null; i++) {
+        result = getParent(node.getChildren()[i], nodeId);
+    }
+    return result;
+
+}
