@@ -29,19 +29,19 @@
 - React
 ## Important Files
 .
-├── Assets                  # Image files
-├── Components              # React components
-├────── Board               # Displays the board
-├────── EngineEvaluation    # Displays the engine evaluation and variations.
-├────── GameMovesDisplay    # Displays the move tree
-├────── Header              
-├────── PromotionSelection  # Display promotion pieces
-├────── main.tsx            # App entry point
-├────── styles.css          # Stylesheet for the app
-├── Services                # Logic for chess and move tree
-├────── chess.ts            # Holds all the functions related to chess, including move generation, validation, and many utility functions
-├────── moveTree.ts         # Holds helper functions for working with trees
-
+├── Assets                  # Image files  
+├── Components              # React components  
+├────── Board               # Displays the board  
+├────── EngineEvaluation    # Displays the engine evaluation and variations.  
+├────── GameMovesDisplay    # Displays the move tree  
+├────── Header                
+├────── PromotionSelection  # Display promotion pieces  
+├────── main.tsx            # App entry point  
+├────── styles.css          # Stylesheet for the app  
+├── Services                # Logic for chess and move tree  
+├────── chess.ts            # Holds all the functions related to chess, including move generation, validation, and many utility functions  
+├────── moveTree.ts         # Holds helper functions for working with trees  
+ 
 ## Author
 
 **Juan Alvarez**
