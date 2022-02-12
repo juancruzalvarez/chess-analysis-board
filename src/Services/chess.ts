@@ -391,7 +391,6 @@ const isOnCheck = (position: Position, color: Colors)=>{
 };
 
 export const isMoveValid = (position: Position, move: Move): boolean =>{
-   console.log('IS MOVE VALID');
    let generationOptions : GenerateMovesOptions = {
       square: move.from,
       legal: true
