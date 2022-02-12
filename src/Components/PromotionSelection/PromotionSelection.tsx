@@ -4,10 +4,10 @@ export const PromotionSelection = (props) =>{
    
    return (
       <div className = 'promotionSelectionContainer'>
-         <PromotionSelectionButton piece = {PieceTypes.KNIGTH} onClickHandler = {props.onClickHandler}/>
-         <PromotionSelectionButton piece = {PieceTypes.BISHOP} onClickHandler = {props.onClickHandler}/>
-         <PromotionSelectionButton piece = {PieceTypes.ROOK} onClickHandler = {props.onClickHandler}/>
-         <PromotionSelectionButton piece = {PieceTypes.QUEEN} onClickHandler = {props.onClickHandler}/>
+         <PromotionSelectionButton piece = {PieceTypes.KNIGTH} onClickHandler = {props.onClickHandler} color={props.color}/>
+         <PromotionSelectionButton piece = {PieceTypes.BISHOP} onClickHandler = {props.onClickHandler} color={props.color}/>
+         <PromotionSelectionButton piece = {PieceTypes.ROOK} onClickHandler = {props.onClickHandler} color={props.color}/>
+         <PromotionSelectionButton piece = {PieceTypes.QUEEN} onClickHandler = {props.onClickHandler} color={props.color}/>
       </div>
    );
 }

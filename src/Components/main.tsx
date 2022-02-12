@@ -1,5 +1,5 @@
 
-import {useState, useRef, DOMElement, useEffect} from 'react';
+import {useState, useRef, useEffect} from 'react';
 //eslint-disable-next-line
 import {PieceTypes, Colors, getPieceType, startPosition, isMoveValid, makeMove, getMoveNotation, squareNotationToIndex,getFENfromPosition, longToShortAlgebraicNotation} from '../Services/chess';
 import {Board} from './Board/Board';
@@ -31,7 +31,6 @@ export const Analysis = (props) =>{
       setCurrentNodeID((current) =>{updatedCurrentNodeID = current; return current;});
       setMoveTree((current) =>{updatedMoveTree = current; return current;});
       setEngineOn((current) =>{updatedEngineOn = current; return current;})
-      console.log(position);
       if(event.key === 'ArrowLeft'){
          let parentNode = getParent(updatedMoveTree, updatedCurrentNodeID);
          setCurrentNodeID(parentNode.id);
@@ -41,7 +40,6 @@ export const Analysis = (props) =>{
          }
       }else if (event.key === 'ArrowRight'){
          let currentNode = searchNode(updatedCurrentNodeID, updatedMoveTree);
-         console.log(currentNode);
          if(currentNode){
             let nextNode = currentNode.getChildren()[0];
             if(nextNode){
@@ -116,7 +114,6 @@ export const Analysis = (props) =>{
    };
    
    const handleOnMouseDown = (e) =>{
-      console.log('MouseDown');
       let index = getBoardSquare(e.clientX, e.clientY);
       if(position.board[index]){
          setSelectedSquare(index);
@@ -124,7 +121,6 @@ export const Analysis = (props) =>{
    };
 
    const handleOnMouseUp = (e) =>{
-      console.log('MouseUp');
       let index = getBoardSquare(e.clientX, e.clientY);
       let move = {from:selectedSquare, to:index, prom:null};
       let rank = Math.floor(index/8);
@@ -165,7 +161,6 @@ export const Analysis = (props) =>{
    };
 
    const handleOnClickPromotion = (piece) =>{
-      console.log(piece);
       addMove({...promMove, prom:piece});
       setShowPromMenu(false);
       setPromMove(null);
@@ -188,7 +183,7 @@ export const Analysis = (props) =>{
 
    return (
    <div className ='mainContainer'>
-      {showPromMenu && <PromotionSelection onClickHandler = {handleOnClickPromotion} color = {promMove.to === 0 ? Colors.BLACK : Colors.WHITE}/>}
+      {showPromMenu && <PromotionSelection onClickHandler = {handleOnClickPromotion} color = {Math.floor(promMove.to/8) ===7 ? Colors.BLACK : Colors.WHITE}/>}
       <div className = 'anotationContainer'></div>
 
       <Board 
