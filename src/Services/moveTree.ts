@@ -15,8 +15,8 @@ export const searchNode = (id, tree) =>{
       }else if (tree.getChildren().length>0){
            var i;
            var result = null;
-           for(i=0; result == null && i < tree.children.length; i++){
-                result = searchNode(tree.getChildren()[i], id);
+           for(i=0; result == null && i < tree.getChildren().length; i++){
+                result = searchNode (id,tree.getChildren()[i]);
            }
            return result;
       }

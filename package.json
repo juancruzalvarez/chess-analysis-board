@@ -1,5 +1,6 @@
 {
-  "name": "chess-anotator",
+  "homepage":" https://juancruzalvarez.github.io/chess-analysis-board",
+  "name": "chess-analysis-board",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -20,6 +21,8 @@
     "web-vitals": "^1.1.2"
   },
   "scripts": {
+    "predeploy":"npm run build",
+    "deploy":"gh-pages -d build",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "jest",
@@ -44,6 +47,7 @@
     ]
   },
   "devDependencies": {
+    "gh-pages": "^3.2.3",
     "jest": "^27.4.7"
   }
 }

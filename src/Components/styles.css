@@ -118,6 +118,7 @@ body{
 }
 .selectedNode{
    background-color: rgb(91, 129, 243);
+   font-weight: bold;
    color: white;
 }
 

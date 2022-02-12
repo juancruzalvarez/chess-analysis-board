@@ -22,7 +22,7 @@ export function GameMovesDisplay(props){
             let tmp = [];
             tmp = parent.getChildren().slice();
             tmp.splice(0,1);
-            tmp = tmp.map((element, index)=>  <SecundaryLinesDisplay node = {element} key = {index} first = {true}  selectedNode = {props.selectedNode} onClickNode ={props.onClickNode}/>);
+            tmp = tmp.map((element, index)=>  <SecundaryLinesDisplay node = {element} key = {index} selectedNode = {props.selectedNode} onClickNode ={props.onClickNode}/>);
             elements[elements.length] = <div key={keyNumber++} className  = 'lineContainer'>{tmp}</div> ;
             elements[elements.length] = <span key={keyNumber++} className = 'index'>{(nodeNumber/2)+1}</span>;
             elements[elements.length] = <span key={keyNumber++} className = 'move'>...</span>;
@@ -30,7 +30,7 @@ export function GameMovesDisplay(props){
             let tmp = [];
             tmp = parent.getChildren().slice();
             tmp.splice(0,1);
-            tmp = tmp.map((element, index)=> <SecundaryLinesDisplay node = {element} key = {index} first = {true}  selectedNode = {props.selectedNode} onClickNode ={props.onClickNode}/>);
+            tmp = tmp.map((element, index)=> <SecundaryLinesDisplay node = {element} key = {index} selectedNode = {props.selectedNode} onClickNode ={props.onClickNode}/>);
             elements[elements.length] = <div key={keyNumber++} className  = 'lineContainer'>{tmp}</div> ;
          }
       }
@@ -71,7 +71,7 @@ const SecundaryLinesDisplay = (props) =>{
       
       tmp = currentNode.getChildren().map(
          (element) =>{
-            return <SecundaryLinesDisplay key = {keyNumber++} selectedNode = {props.selectedNode} node={element} first = {false} onClickNode ={props.onClickNode}/>
+            return <SecundaryLinesDisplay key = {keyNumber++} selectedNode = {props.selectedNode} node={element} onClickNode ={props.onClickNode}/>
          }
       );
    }
