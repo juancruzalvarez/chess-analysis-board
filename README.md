@@ -1,7 +1,7 @@
 <h1 align="center">Chess Analysis Board</h1>
 
 <p align="center">
-  Web application for analysing chess games, developed with react.
+  Web application for analyzing chess games, developed with react.
 </p>
 
 ## Links
@@ -21,7 +21,7 @@
 
 ## Features
 -Move validation  
--Stockfish analysis via stockfish.js  
+-Stockfish engine analysis via stockfish.js  
 -Analysis of variations  
 ## Built With
 - Typescript
